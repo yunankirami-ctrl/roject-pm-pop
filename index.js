@@ -7,7 +7,7 @@ const path = require('path');
 const multer = require('multer');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'tmp/' });
 
 app.use(express.static('public'));
 
