@@ -6,7 +6,6 @@ const fs = require('fs');
 const os = require('os');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Gunakan direktori sementara sistem (/tmp di Vercel)
 const tmpDir = os.tmpdir();
@@ -18,6 +17,11 @@ const upload = multer({ dest: tmpDir });
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Route khusus untuk menyajikan index.html di root '/'
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Endpoint untuk menangani submit form
 app.post('/api/submit', upload.fields([
@@ -37,7 +41,7 @@ app.post('/api/submit', upload.fields([
         const templatePath = path.join(__dirname, 'BANDUNG SELATAN GI 150KV.xlsx');
         
         if (!fs.existsSync(templatePath)) {
-            return res.status(500).json({ error: 'File template Excel tidak ditemukan!' });
+            return res.status(500).json({ error: 'File template Excel tidak ditemukan di server!' });
         }
 
         const workbook = new ExcelJS.Workbook();
@@ -112,7 +116,6 @@ app.post('/api/submit', upload.fields([
         // Kirimkan file Excel ke client
         res.download(outputPath, 'Hasil_Inspeksi_GI.xlsx', (err) => {
             if (err) console.error("Error saat mendownload file:", err);
-            // Hapus file hasil setelah terkirim
             fs.unlink(outputPath, () => {});
         });
 
@@ -122,8 +125,9 @@ app.post('/api/submit', upload.fields([
     }
 });
 
-// Jalankan server jika dijalankan secara lokal
-if (process.env.NODE_ENV !== 'production') {
+// Jalankan server lokal hanya jika TIDAK di lingkungan Vercel
+if (!process.env.VERCEL) {
+    const port = process.env.PORT || 3000;
     app.listen(port, () => {
         console.log(`Server berjalan di http://localhost:${port}`);
     });
