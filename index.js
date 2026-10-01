@@ -1,137 +1,111 @@
 const express = require('express');
-const multer = require('multer');
-const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
+const ExcelJS = require('exceljs');
 
 const app = express();
 
-// Gunakan direktori sementara sistem (/tmp di Vercel)
-const tmpDir = os.tmpdir();
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Konfigurasi Multer untuk mengunggah file ke direktori sementara
-const upload = multer({ dest: tmpDir });
+app.post('/api/submit-pm', async (req, res) => {
+  try {
+    const data = req.body;
+    
+    // Path ke file template di Vercel
+    const templatePath = path.join(process.cwd(), 'templates', 'BANDUNG_SELATAN_GI_150KV.xlsx');
 
-// Serve static files dari folder 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Route khusus untuk menyajikan index.html di root '/'
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Endpoint untuk menangani submit form
-app.post('/api/submit', upload.fields([
-    { name: 'fotoBangunan', maxCount: 1 },
-    { name: 'fotoLayout', maxCount: 1 },
-    { name: 'acFoto', maxCount: 10 },
-    { name: 'hidrantFoto', maxCount: 10 },
-    { name: 'aparFoto', maxCount: 10 },
-    { name: 'pencahayaanFoto', maxCount: 10 },
-    { name: 'stopKontakFoto', maxCount: 10 }
-]), async (req, res) => {
-    try {
-        const body = req.body;
-        const files = req.files || {};
-
-        // Path ke template Excel di root proyek
-        const templatePath = path.join(__dirname, 'BANDUNG SELATAN GI 150KV.xlsx');
-        
-        if (!fs.existsSync(templatePath)) {
-            return res.status(500).json({ error: 'File template Excel tidak ditemukan di server!' });
-        }
-
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(templatePath);
-
-        const worksheet = workbook.getWorksheet(1); // Mengambil sheet pertama
-
-        // 1. Mengisi Data Informasi Umum
-        if (body.namaGi) worksheet.getCell('C4').value = body.namaGi;
-        if (body.lokasiGi) worksheet.getCell('C5').value = body.lokasiGi;
-        if (body.tanggalInspeksi) worksheet.getCell('C6').value = body.tanggalInspeksi;
-        if (body.petugasInspeksi) worksheet.getCell('C7').value = body.petugasInspeksi;
-
-        // Helper function untuk memasukkan gambar ke dalam cell
-        const addImageToCell = (fileArray, cellRef) => {
-            if (fileArray && fileArray.length > 0) {
-                const imagePath = fileArray[0].path;
-                const imageId = workbook.addImage({
-                    filename: imagePath,
-                    extension: path.extname(fileArray[0].originalname).substring(1) || 'png',
-                });
-                worksheet.addImage(imageId, cellRef);
-            }
-        };
-
-        // Mengisi foto bangunan & layout jika ada
-        if (files['fotoBangunan']) addImageToCell(files['fotoBangunan'], 'B9:D15');
-        if (files['fotoLayout']) addImageToCell(files['fotoLayout'], 'E9:G15');
-
-        // 2. Helper function untuk mengisi data array / tabel dinamis
-        const fillDynamicData = (startRow, merkArray, kondisiArray, fotoArray) => {
-            if (!merkArray) return;
-            
-            const merks = Array.isArray(merkArray) ? merkArray : [merkArray];
-            const kondisis = Array.isArray(kondisiArray) ? kondisiArray : [kondisiArray];
-            const fotos = fotoArray || [];
-
-            merks.forEach((merk, index) => {
-                const currentRow = startRow + index;
-                worksheet.getCell(`B${currentRow}`).value = index + 1;
-                worksheet.getCell(`C${currentRow}`).value = merk;
-                worksheet.getCell(`D${currentRow}`).value = kondisis[index] || '';
-
-                if (fotos[index]) {
-                    const imageId = workbook.addImage({
-                        filename: fotos[index].path,
-                        extension: path.extname(fotos[index].originalname).substring(1) || 'png',
-                    });
-                    worksheet.addImage(imageId, `E${currentRow}:E${currentRow}`);
-                }
-            });
-        };
-
-        // Mengisi data tabel dinamis
-        fillDynamicData(18, body.acMerk, body.acKondisi, files['acFoto']);
-        fillDynamicData(25, body.hidrantMerk, body.hidrantKondisi, files['hidrantFoto']);
-        fillDynamicData(32, body.aparMerk, body.aparKondisi, files['aparFoto']);
-        fillDynamicData(39, body.pencahayaanMerk, body.pencahayaanKondisi, files['pencahayaanFoto']);
-        fillDynamicData(46, body.stopKontakMerk, body.stopKontakKondisi, files['stopKontakFoto']);
-
-        // Simpan hasil ke folder temp Vercel/Sistem
-        const outputPath = path.join(tmpDir, `Hasil_Inspeksi_${Date.now()}.xlsx`);
-        await workbook.xlsx.writeFile(outputPath);
-
-        // Hapus file upload sementara dari folder temp
-        Object.keys(files).forEach(key => {
-            files[key].forEach(file => {
-                fs.unlink(file.path, () => {});
-            });
-        });
-
-        // Kirimkan file Excel ke client
-        res.download(outputPath, 'Hasil_Inspeksi_GI.xlsx', (err) => {
-            if (err) console.error("Error saat mendownload file:", err);
-            fs.unlink(outputPath, () => {});
-        });
-
-    } catch (error) {
-        console.error('Error memproses form:', error);
-        res.status(500).json({ error: 'Terjadi kesalahan saat memproses data.' });
+    if (!fs.existsSync(templatePath)) {
+      return res.status(500).json({
+        success: false,
+        message: 'File template BANDUNG_SELATAN_GI_150KV.xlsx tidak ditemukan di folder templates/'
+      });
     }
+
+    // 1. Load Template Excel
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(templatePath);
+
+    // 2. Mapping Data ke Sheet COVER
+    const sheetCover = workbook.getWorksheet('COVER');
+    if (sheetCover) {
+      sheetCover.getCell('D8').value = data.idMr || '-';
+      sheetCover.getCell('D9').value = data.tanggal || '-';
+      sheetCover.getCell('D10').value = data.namaPop || 'GI BANDUNG SELATAN 150KV';
+      sheetCover.getCell('D11').value = data.alamatPop || '-';
+      sheetCover.getCell('D12').value = data.koordinatPop || '-';
+      sheetCover.getCell('D13').value = data.tipePop || 'Super Backbone';
+    }
+
+    // 3. Mapping Data ke Sheet KWH
+    const sheetKwh = workbook.getWorksheet('KWH');
+    if (sheetKwh) {
+      sheetKwh.getCell('C3').value = data.plnKapasitas || '-';
+      sheetKwh.getCell('C4').value = data.kwhMcbR || '-';
+      sheetKwh.getCell('C5').value = data.kwhMcbS || '-';
+      sheetKwh.getCell('C6').value = data.kwhMcbT || '-';
+    }
+
+    // 4. Mapping Data ke Sheet Rectifier
+    const sheetRect = workbook.getWorksheet('Rectifier');
+    if (sheetRect && data.rectifierData && data.rectifierData.length > 0) {
+      const rect1 = data.rectifierData[0];
+      sheetRect.getCell('D3').value = rect1.merk || '-';
+      sheetRect.getCell('D4').value = rect1.tipe || '-';
+
+      if (rect1.mcbs && Array.isArray(rect1.mcbs)) {
+        let mcbStartRow = 16;
+        rect1.mcbs.forEach((mcb, idx) => {
+          if (mcbStartRow + (idx * 3) <= 30) {
+            let rowIdx = mcbStartRow + (idx * 3);
+            sheetRect.getCell(`E${rowIdx}`).value = mcb.cap ? `${mcb.cap}A` : '-';
+            sheetRect.getCell(`E${rowIdx + 1}`).value = mcb.peruntukan || '-';
+          }
+        });
+      }
+    }
+
+    // 5. Mapping Data ke Sheet AIR CONDITIONER
+    const sheetAc = workbook.getWorksheet('AIR CONDITIONER');
+    if (sheetAc && data.acList && data.acList.length > 0) {
+      data.acList.forEach((ac, idx) => {
+        let baseRow = 2 + (idx * 6);
+        if (baseRow < 25) {
+          sheetAc.getCell(`D${baseRow}`).value = ac.merk || '-';
+          sheetAc.getCell(`D${baseRow + 1}`).value = ac.kapasitas || '-';
+        }
+      });
+    }
+
+    // 6. Mapping Data ke Sheet Battery
+    const sheetBattery = workbook.getWorksheet('Battery');
+    if (sheetBattery) {
+      sheetBattery.getCell('D2').value = data.bateraiMerk || '-';
+      sheetBattery.getCell('D4').value = data.bateraiKapasitas ? `${data.bateraiKapasitas}AH` : '-';
+    }
+
+    // 7. Mapping Data ke Sheet Environtment
+    const sheetEnv = workbook.getWorksheet('Environtment');
+    if (sheetEnv) {
+      sheetEnv.getCell('B1').value = data.suhuRuangan || '-';
+      sheetEnv.getCell('D4').value = data.kondisiGedung === 'OK' ? 'V' : '';
+      sheetEnv.getCell('F4').value = data.kondisiGedung === 'NOK' ? 'V' : '';
+    }
+
+    // 8. Generate Excel Buffer untuk Serverless
+    const buffer = await workbook.xlsx.writeBuffer();
+    const cleanPopName = (data.namaPop || 'BANDUNG_SELATAN').replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `PM_${cleanPopName}_${Date.now()}.xlsx`;
+
+    // Kirim langsung sebagai file Download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    return res.send(buffer);
+
+  } catch (error) {
+    console.error('Error Vercel Serverless Excel:', error);
+    res.status(500).json({ success: false, message: 'Gagal memproses template Excel di Vercel.' });
+  }
 });
 
-// Jalankan server lokal hanya jika TIDAK di lingkungan Vercel
-if (!process.env.VERCEL) {
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => {
-        console.log(`Server berjalan di http://localhost:${port}`);
-    });
-}
-
-// Export app wajib untuk Vercel
 module.exports = app;
