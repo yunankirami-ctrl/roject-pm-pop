@@ -8,17 +8,37 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// 1. Sajikan file HTML statis dari folder public
+app.use(express.static(path.join(process.cwd(), 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+});
+
+// 2. Endpoint API Submit PM Form
 app.post('/api/submit-pm', async (req, res) => {
   try {
     const data = req.body;
     
-    // Path ke file template di Vercel
-    const templatePath = path.join(process.cwd(), 'templates', 'BANDUNG_SELATAN_GI_150KV.xlsx');
+    // Path dinamis mengecek beberapa kemungkinan lokasi file Excel
+    let templatePath = path.join(process.cwd(), 'public', 'templates', 'Template_PM_Bandung_Selatan.xlsx');
+
+    // Pengecekan cadangan jika ditaruh di folder lain
+    if (!fs.existsSync(templatePath)) {
+      templatePath = path.join(process.cwd(), 'public', 'templates', 'BANDUNG_SELATAN_GI_150KV.xlsx');
+    }
+    if (!fs.existsSync(templatePath)) {
+      templatePath = path.join(process.cwd(), 'templates', 'Template_PM_Bandung_Selatan.xlsx');
+    }
+    if (!fs.existsSync(templatePath)) {
+      templatePath = path.join(process.cwd(), 'BANDUNG_SELATAN_GI_150KV.xlsx');
+    }
 
     if (!fs.existsSync(templatePath)) {
+      console.error('File template Excel tidak ditemukan!');
       return res.status(500).json({
         success: false,
-        message: 'File template BANDUNG_SELATAN_GI_150KV.xlsx tidak ditemukan di folder templates/'
+        message: 'File template Excel tidak ditemukan di server Vercel.'
       });
     }
 
@@ -107,5 +127,11 @@ app.post('/api/submit-pm', async (req, res) => {
     res.status(500).json({ success: false, message: 'Gagal memproses template Excel di Vercel.' });
   }
 });
+
+// Jalankan server lokal jika diuji di localhost
+const PORT = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
 
 module.exports = app;
