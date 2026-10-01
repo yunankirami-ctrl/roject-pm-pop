@@ -3,143 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form Laporan Preventive Maintenance (PM)</title>
+  <title>Form PM - Save to OneDrive & WA Alert</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
-    .container { max-width: 650px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2, h3 { color: #333; text-align: center; }
-    .section-title { font-weight: bold; border-bottom: 2px solid #007bff; margin-top: 20px; padding-bottom: 5px; color: #007bff; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
     .form-group { margin-bottom: 12px; }
-    label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 14px; }
+    label { font-weight: bold; display: block; margin-bottom: 4px; }
     input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    .row { display: flex; gap: 10px; }
-    .col { flex: 1; }
-    button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-    button:hover { background-color: #218838; }
+    button { width: 100%; padding: 12px; background-color: #0078d4; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+    button:hover { background-color: #005a9e; }
+    .status-msg { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; text-align: center; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Form Input PM POP</h2>
+  <h2>Form PM (Save OneDrive & WA Notif)</h2>
   <form id="pmForm">
+    <div class="form-group">
+      <label for="idMr">ID MR:</label>
+      <input type="text" id="idMr" placeholder="MR-2026-001" required>
+    </div>
 
-    <!-- DATA COVER -->
-    <div class="section-title">1. COVER / DATA GENERAL</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="idMr">ID MR:</label>
-        <input type="text" id="idMr" name="idMr" placeholder="MR-2026-001" required>
-      </div>
-      <div class="col form-group">
-        <label for="tanggal">Tanggal PM:</label>
-        <input type="date" id="tanggal" name="tanggal" required>
-      </div>
+    <div class="form-group">
+      <label for="tanggal">Tanggal PM:</label>
+      <input type="date" id="tanggal" required>
     </div>
 
     <div class="form-group">
       <label for="namaPop">Nama POP:</label>
-      <input type="text" id="namaPop" name="namaPop" value="GI BANDUNG SELATAN 150KV" required>
+      <input type="text" id="namaPop" value="GI BANDUNG SELATAN 150KV" required>
     </div>
 
     <div class="form-group">
-      <label for="alamatPop">Alamat POP:</label>
-      <input type="text" id="alamatPop" name="alamatPop" placeholder="Jl. Raya Bandung Selatan No. 10">
+      <label for="targetWa">Nomor WA Notifikasi (Format 62...):</label>
+      <input type="text" id="targetWa" placeholder="628123456789" required>
     </div>
 
-    <!-- DATA KWH -->
-    <div class="section-title">2. KWH & PLN</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="plnKapasitas">Kapasitas PLN:</label>
-        <input type="text" id="plnKapasitas" value="33 KVA">
-      </div>
-      <div class="col form-group">
-        <label for="kwhMcbR">MCB Phase R (A):</label>
-        <input type="text" id="kwhMcbR" placeholder="50">
-      </div>
-    </div>
-
-    <!-- DATA RECTIFIER -->
-    <div class="section-title">3. RECTIFIER</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="rectMerk">Merk Rectifier:</label>
-        <input type="text" id="rectMerk" placeholder="Emerson / Vertiv">
-      </div>
-      <div class="col form-group">
-        <label for="rectTipe">Tipe Rectifier:</label>
-        <input type="text" id="rectTipe" placeholder="NetSure 701">
-      </div>
-    </div>
-
-    <!-- DATA BATTERY -->
-    <div class="section-title">4. BATTERY</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="bateraiMerk">Merk Baterai:</label>
-        <input type="text" id="bateraiMerk" placeholder="Enersys">
-      </div>
-      <div class="col form-group">
-        <label for="bateraiKapasitas">Kapasitas Baterai (AH):</label>
-        <input type="text" id="bateraiKapasitas" placeholder="100">
-      </div>
-    </div>
-
-    <!-- DATA ENVIRONMENT -->
-    <div class="section-title">5. ENVIRONMENT</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="suhuRuangan">Suhu Ruangan (°C):</label>
-        <input type="text" id="suhuRuangan" placeholder="22 °C">
-      </div>
-      <div class="col form-group">
-        <label for="kondisiGedung">Kondisi Gedung:</label>
-        <select id="kondisiGedung">
-          <option value="OK">OK</option>
-          <option value="NOK">NOK</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- NOMOR WA TUJUAN -->
-    <div class="section-title">NOHP/WA PENERIMA</div>
-    <div class="form-group">
-      <label for="waNumber">Nomor WA Tujuan (Format 62...):</label>
-      <input type="text" id="waNumber" placeholder="628123456789" required>
-    </div>
-
-    <button type="submit" id="submitBtn">Generate Excel & Send WhatsApp Summary</button>
+    <button type="submit" id="submitBtn">Submit Data</button>
   </form>
+
+  <div id="statusBox" class="status-msg"></div>
 </div>
 
 <script>
   document.getElementById('pmForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
+    const statusBox = document.getElementById('statusBox');
+
     btn.disabled = true;
-    btn.innerText = 'Memproses Laporan PM...';
+    btn.innerText = 'Menyimpan ke OneDrive & Mengirim WA...';
+    statusBox.style.display = 'none';
 
     const formData = {
       idMr: document.getElementById('idMr').value,
       tanggal: document.getElementById('tanggal').value,
       namaPop: document.getElementById('namaPop').value,
-      alamatPop: document.getElementById('alamatPop').value,
-      koordinatPop: '-',
+      targetWa: document.getElementById('targetWa').value.replace(/[^0-9]/g, ''),
       tipePop: 'Super Backbone',
-      plnKapasitas: document.getElementById('plnKapasitas').value,
-      kwhMcbR: document.getElementById('kwhMcbR').value,
-      rectifierData: [{
-        merk: document.getElementById('rectMerk').value,
-        tipe: document.getElementById('rectTipe').value
-      }],
-      bateraiMerk: document.getElementById('bateraiMerk').value,
-      bateraiKapasitas: document.getElementById('bateraiKapasitas').value,
-      suhuRuangan: document.getElementById('suhuRuangan').value,
-      kondisiGedung: document.getElementById('kondisiGedung').value
+      plnKapasitas: '33 KVA',
+      bateraiMerk: 'Enersys',
+      bateraiKapasitas: '100',
+      suhuRuangan: '22 °C',
+      kondisiGedung: 'OK'
     };
-
-    const targetWa = document.getElementById('waNumber').value.replace(/[^0-9]/g, '');
 
     try {
       const response = await fetch('/api/submit-pm', {
@@ -148,60 +77,25 @@
         body: JSON.stringify(formData)
       });
 
+      const resData = await response.json();
+
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Gagal memproses Laporan PM di Server');
+        throw new Error(resData.message || 'Gagal memproses data');
       }
 
-      // 1. Download File Excel Otomatis
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `PM_${formData.namaPop.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      // 2. Buat Format Teks Sesuai Isi Sheet Excel
-      const rectMerk = formData.rectifierData[0].merk || '-';
-      const rectTipe = formData.rectifierData[0].tipe || '-';
-
-      const teksWA = 
-        `*📊 HASIL LAPORAN PREVENTIVE MAINTENANCE*%0A` +
-        `==================================%0A%0A` +
-        `*📋 [COVER / GENERAL]*%0A` +
-        `• ID MR: ${formData.idMr}%0A` +
-        `• Tanggal PM: ${formData.tanggal}%0A` +
-        `• Nama POP: ${formData.namaPop}%0A` +
-        `• Alamat: ${formData.alamatPop || '-'}%0A` +
-        `• Tipe POP: ${formData.tipePop}%0A%0A` +
-
-        `*⚡ [KWH / PLN]*%0A` +
-        `• Kapasitas PLN: ${formData.plnKapasitas || '-'}%0A` +
-        `• MCB Phase R: ${formData.kwhMcbR || '-'} A%0A%0A` +
-
-        `*🔌 [RECTIFIER]*%0A` +
-        `• Merk: ${rectMerk}%0A` +
-        `• Tipe: ${rectTipe}%0A%0A` +
-
-        `*🔋 [BATTERY]*%0A` +
-        `• Merk: ${formData.bateraiMerk || '-'}%0A` +
-        `• Kapasitas: ${formData.bateraiKapasitas ? formData.bateraiKapasitas + ' AH' : '-'}%0A%0A` +
-
-        `*🌡️ [ENVIRONMENT]*%0A` +
-        `• Suhu Ruangan: ${formData.suhuRuangan || '-'}%0A` +
-        `• Kondisi Gedung: ${formData.kondisiGedung}%0A` +
-        `==================================%0A` +
-        `_📁 File Excel lengkap telah terunduh di perangkat Anda._`;
-
-      window.open(`https://wa.me/${targetWa}?text=${teksWA}`, '_blank');
+      statusBox.style.display = 'block';
+      statusBox.style.backgroundColor = '#d4edda';
+      statusBox.style.color = '#155724';
+      statusBox.innerHTML = `✅ ${resData.message}<br><br><a href="${resData.oneDriveUrl}" target="_blank">Buka File di OneDrive</a>`;
 
     } catch (error) {
-      alert('Terjadi kesalahan: ' + error.message);
+      statusBox.style.display = 'block';
+      statusBox.style.backgroundColor = '#f8d7da';
+      statusBox.style.color = '#721c24';
+      statusBox.innerText = '❌ Error: ' + error.message;
     } finally {
       btn.disabled = false;
-      btn.innerText = 'Generate Excel & Send WhatsApp Summary';
+      btn.innerText = 'Submit Data';
     }
   });
 </script>
