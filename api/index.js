@@ -1,5 +1,5 @@
 const express = require('express');
-const path = require('path');
+const path = path = require('path');
 const fs = require('fs');
 const ExcelJS = require('exceljs');
 const axios = require('axios');
@@ -9,74 +9,76 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Sajikan file statis frontend dari folder public
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
-// Helper: Unggah File ke OneDrive via Microsoft Graph API
-async function uploadToOneDrive(buffer, fileName) {
-  const ONEDRIVE_ACCESS_TOKEN = process.env.ONEDRIVE_ACCESS_TOKEN; // Set di Vercel Environment Variables
-  if (!ONEDRIVE_ACCESS_TOKEN) {
-    console.warn('ONEDRIVE_ACCESS_TOKEN belum diset.');
-    return null;
-  }
+// Helper: Kirim Pesan / Notifikasi via WhatsApp Gateway
+async function sendWaNotification(targetWa, data) {
+  const WA_API_KEY = process.env.WA_API_KEY; // Dari Environment Variables Vercel
+  const DEFAULT_TARGET = process.env.TARGET_WA; // Dari Environment Variables Vercel
 
-  try {
-    const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Laporan_PM/${fileName}:/content`;
-    const response = await axios.put(uploadUrl, buffer, {
-      headers: {
-        'Authorization': `Bearer ${ONEDRIVE_ACCESS_TOKEN}`,
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      }
-    });
+  const destinationNumber = targetWa || DEFAULT_TARGET;
 
-    return response.data.webUrl; // Mengembalikan URL Link File di OneDrive
-  } catch (error) {
-    console.error('Gagal Unggah ke OneDrive:', error.response ? error.response.data : error.message);
-    return null;
-  }
-}
-
-// Helper: Kirim Notifikasi WA via Gateway (Contoh: Fonnte API)
-async function sendWaNotification(targetWa, data, fileUrl) {
-  const FONNTE_TOKEN = process.env.FONNTE_TOKEN; // Set di Vercel Environment Variables
-  if (!FONNTE_TOKEN) {
-    console.warn('FONNTE_TOKEN belum diset.');
+  if (!WA_API_KEY) {
+    console.warn('WA_API_KEY belum diset di Vercel Environment Variables.');
     return false;
   }
 
+  const rectMerk = (data.rectifierData && data.rectifierData[0] && data.rectifierData[0].merk) || '-';
+  const rectTipe = (data.rectifierData && data.rectifierData[0] && data.rectifierData[0].tipe) || '-';
+
   const message = 
-    `*🔔 NOTIFIKASI LAPORAN PM BARU*\n` +
+    `*📊 LAPORAN PREVENTIVE MAINTENANCE BARU*\n` +
+    `==================================\n\n` +
+    `*📋 [COVER / GENERAL]*\n` +
+    `• ID MR: ${data.idMr || '-'}\n` +
+    `• Tanggal PM: ${data.tanggal || '-'}\n` +
+    `• Nama POP: ${data.namaPop || '-'}\n` +
+    `• Alamat: ${data.alamatPop || '-'}\n` +
+    `• Tipe POP: ${data.tipePop || 'Super Backbone'}\n\n` +
+
+    `*⚡ [KWH / PLN]*\n` +
+    `• Kapasitas PLN: ${data.plnKapasitas || '-'}\n` +
+    `• MCB Phase R: ${data.kwhMcbR || '-'} A\n\n` +
+
+    `*🔌 [RECTIFIER]*\n` +
+    `• Merk: ${rectMerk}\n` +
+    `• Tipe: ${rectTipe}\n\n` +
+
+    `*🔋 [BATTERY]*\n` +
+    `• Merk: ${data.bateraiMerk || '-'}\n` +
+    `• Kapasitas: ${data.bateraiKapasitas ? data.bateraiKapasitas + ' AH' : '-'}\n\n` +
+
+    `*🌡️ [ENVIRONMENT]*\n` +
+    `• Suhu Ruangan: ${data.suhuRuangan || '-'}\n` +
+    `• Kondisi Gedung: ${data.kondisiGedung || '-'}\n\n` +
     `==================================\n` +
-    `*ID MR:* ${data.idMr}\n` +
-    `*Tanggal:* ${data.tanggal}\n` +
-    `*POP:* ${data.namaPop}\n` +
-    `*Status:* File Excel berhasil tersimpan ke OneDrive!\n\n` +
-    `*Link File OneDrive:*\n${fileUrl || 'Gagal generate link OneDrive'}\n` +
-    `==================================`;
+    `_✅ Data laporan PM di atas telah berhasil diproses oleh sistem._`;
 
   try {
     await axios.post('https://api.fonnte.com/send', {
-      target: targetWa,
+      target: destinationNumber,
       message: message,
     }, {
-      headers: { 'Authorization': FONNTE_TOKEN }
+      headers: { 'Authorization': WA_API_KEY }
     });
     return true;
   } catch (error) {
-    console.error('Gagal Kirim WA Gateway:', error.message);
+    console.error('Gagal Kirim Notifikasi WA:', error.response ? error.response.data : error.message);
     return false;
   }
 }
 
-// Endpoint Submit Form
+// Endpoint Submit Form PM
 app.post('/api/submit-pm', async (req, res) => {
   try {
     const data = req.body;
     
-    // Search Template Path
+    // Pencarian path file template Excel
     const possiblePaths = [
       path.join(__dirname, '..', 'public', 'templates', 'Template_PM_Bandung_Selatan.xlsx'),
       path.join(process.cwd(), 'public', 'templates', 'Template_PM_Bandung_Selatan.xlsx'),
@@ -87,16 +89,18 @@ app.post('/api/submit-pm', async (req, res) => {
     let templatePath = possiblePaths.find(p => fs.existsSync(p));
 
     if (!templatePath) {
+      console.error('File template Excel tidak ditemukan pada lokasi:', possiblePaths);
       return res.status(500).json({
         success: false,
-        message: 'File template Excel tidak ditemukan di server.'
+        message: 'File template Excel tidak ditemukan di server Vercel.'
       });
     }
 
-    // Load & Mapping Excel
+    // Load & Mapping data ke Template Excel
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(templatePath);
 
+    // 1. Mapping Cover
     const sheetCover = workbook.getWorksheet('COVER');
     if (sheetCover) {
       sheetCover.getCell('D8').value = data.idMr || '-';
@@ -107,12 +111,14 @@ app.post('/api/submit-pm', async (req, res) => {
       sheetCover.getCell('D13').value = data.tipePop || 'Super Backbone';
     }
 
+    // 2. Mapping KWH
     const sheetKwh = workbook.getWorksheet('KWH');
     if (sheetKwh) {
       sheetKwh.getCell('C3').value = data.plnKapasitas || '-';
       sheetKwh.getCell('C4').value = data.kwhMcbR || '-';
     }
 
+    // 3. Mapping Rectifier
     const sheetRect = workbook.getWorksheet('Rectifier');
     if (sheetRect && data.rectifierData && data.rectifierData.length > 0) {
       const rect1 = data.rectifierData[0];
@@ -120,12 +126,14 @@ app.post('/api/submit-pm', async (req, res) => {
       sheetRect.getCell('D4').value = rect1.tipe || '-';
     }
 
+    // 4. Mapping Battery
     const sheetBattery = workbook.getWorksheet('Battery');
     if (sheetBattery) {
       sheetBattery.getCell('D2').value = data.bateraiMerk || '-';
       sheetBattery.getCell('D4').value = data.bateraiKapasitas ? `${data.bateraiKapasitas}AH` : '-';
     }
 
+    // 5. Mapping Environtment
     const sheetEnv = workbook.getWorksheet('Environtment');
     if (sheetEnv) {
       sheetEnv.getCell('B1').value = data.suhuRuangan || '-';
@@ -133,28 +141,19 @@ app.post('/api/submit-pm', async (req, res) => {
       sheetEnv.getCell('F4').value = data.kondisiGedung === 'NOK' ? 'V' : '';
     }
 
-    // Generate Excel Buffer
-    const buffer = await workbook.xlsx.writeBuffer();
-    const cleanPopName = (data.namaPop || 'BANDUNG_SELATAN').replace(/[^a-zA-Z0-9]/g, '_');
-    const fileName = `PM_${cleanPopName}_${Date.now()}.xlsx`;
-
-    // 1. Upload ke OneDrive
-    const oneDriveUrl = await uploadToOneDrive(buffer, fileName);
-
-    // 2. Kirim Notifikasi via WA Gateway jika nomor tujuan diisi
-    if (data.targetWa) {
-      await sendWaNotification(data.targetWa, data, oneDriveUrl);
-    }
+    // Proses pengiriman notifikasi ke WA
+    const targetWa = data.targetWa || process.env.TARGET_WA;
+    const isWaSent = await sendWaNotification(targetWa, data);
 
     return res.status(200).json({
       success: true,
-      message: 'Laporan PM berhasil diproses, disimpan ke OneDrive, dan notifikasi WA dikirim!',
-      oneDriveUrl: oneDriveUrl,
-      fileName: fileName
+      message: isWaSent 
+        ? 'Laporan PM berhasil diproses dan notifikasi telah dikirimkan ke WhatsApp!' 
+        : 'Laporan PM berhasil diproses, namun notifikasi WA gagal terkirim (Cek WA_API_KEY).'
     });
 
   } catch (error) {
-    console.error('Error Processing PM Report:', error);
+    console.error('Error Vercel Serverless PM:', error);
     res.status(500).json({ success: false, message: 'Gagal memproses Laporan PM di Server.' });
   }
 });

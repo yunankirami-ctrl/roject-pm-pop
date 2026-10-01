@@ -3,32 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form PM - Save to OneDrive & WA Alert</title>
+  <title>Form Laporan PM - Kirim WhatsApp</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
     .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #333; }
+    h2 { text-align: center; color: #333; margin-bottom: 20px; }
+    .section-title { font-weight: bold; border-bottom: 2px solid #25D366; margin-top: 15px; padding-bottom: 5px; color: #128C7E; }
     .form-group { margin-bottom: 12px; }
-    label { font-weight: bold; display: block; margin-bottom: 4px; }
+    label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 14px; }
     input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    button { width: 100%; padding: 12px; background-color: #0078d4; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-    button:hover { background-color: #005a9e; }
-    .status-msg { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; text-align: center; font-weight: bold; }
+    .row { display: flex; gap: 10px; }
+    .col { flex: 1; }
+    button { width: 100%; padding: 12px; background-color: #25D366; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+    button:hover { background-color: #128C7E; }
+    .status-box { margin-top: 15px; padding: 12px; border-radius: 4px; display: none; text-align: center; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Form PM (Save OneDrive & WA Notif)</h2>
+  <h2>Form Laporan PM POP</h2>
   <form id="pmForm">
-    <div class="form-group">
-      <label for="idMr">ID MR:</label>
-      <input type="text" id="idMr" placeholder="MR-2026-001" required>
-    </div>
 
-    <div class="form-group">
-      <label for="tanggal">Tanggal PM:</label>
-      <input type="date" id="tanggal" required>
+    <!-- DATA COVER -->
+    <div class="section-title">1. COVER / GENERAL</div>
+    <div class="row">
+      <div class="col form-group">
+        <label for="idMr">ID MR:</label>
+        <input type="text" id="idMr" placeholder="MR-2026-001" required>
+      </div>
+      <div class="col form-group">
+        <label for="tanggal">Tanggal PM:</label>
+        <input type="date" id="tanggal" required>
+      </div>
     </div>
 
     <div class="form-group">
@@ -37,14 +44,74 @@
     </div>
 
     <div class="form-group">
-      <label for="targetWa">Nomor WA Notifikasi (Format 62...):</label>
-      <input type="text" id="targetWa" placeholder="628123456789" required>
+      <label for="alamatPop">Alamat POP:</label>
+      <input type="text" id="alamatPop" placeholder="Jl. Raya Bandung Selatan No. 10">
     </div>
 
-    <button type="submit" id="submitBtn">Submit Data</button>
+    <!-- DATA KWH -->
+    <div class="section-title">2. KWH & PLN</div>
+    <div class="row">
+      <div class="col form-group">
+        <label for="plnKapasitas">Kapasitas PLN:</label>
+        <input type="text" id="plnKapasitas" value="33 KVA">
+      </div>
+      <div class="col form-group">
+        <label for="kwhMcbR">MCB Phase R (A):</label>
+        <input type="text" id="kwhMcbR" placeholder="50">
+      </div>
+    </div>
+
+    <!-- DATA RECTIFIER -->
+    <div class="section-title">3. RECTIFIER & BATTERY</div>
+    <div class="row">
+      <div class="col form-group">
+        <label for="rectMerk">Merk Rectifier:</label>
+        <input type="text" id="rectMerk" placeholder="Emerson / Vertiv">
+      </div>
+      <div class="col form-group">
+        <label for="rectTipe">Tipe Rectifier:</label>
+        <input type="text" id="rectTipe" placeholder="NetSure 701">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col form-group">
+        <label for="bateraiMerk">Merk Baterai:</label>
+        <input type="text" id="bateraiMerk" placeholder="Enersys">
+      </div>
+      <div class="col form-group">
+        <label for="bateraiKapasitas">Kapasitas Baterai (AH):</label>
+        <input type="text" id="bateraiKapasitas" placeholder="100">
+      </div>
+    </div>
+
+    <!-- ENVIRONMENT -->
+    <div class="section-title">4. ENVIRONMENT</div>
+    <div class="row">
+      <div class="col form-group">
+        <label for="suhuRuangan">Suhu Ruangan (°C):</label>
+        <input type="text" id="suhuRuangan" placeholder="22 °C">
+      </div>
+      <div class="col form-group">
+        <label for="kondisiGedung">Kondisi Gedung:</label>
+        <select id="kondisiGedung">
+          <option value="OK">OK</option>
+          <option value="NOK">NOK</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- WHATSAPP RECIPIENT -->
+    <div class="section-title">5. NOMOR WA TUJUAN</div>
+    <div class="form-group">
+      <label for="targetWa">Nomor WhatsApp Penerima (Kosongkan jika pakai default):</label>
+      <input type="text" id="targetWa" placeholder="Contoh: 628123456789">
+    </div>
+
+    <button type="submit" id="submitBtn">Submit Data & Kirim WA Notifikasi</button>
   </form>
 
-  <div id="statusBox" class="status-msg"></div>
+  <div id="statusBox" class="status-box"></div>
 </div>
 
 <script>
@@ -54,20 +121,26 @@
     const statusBox = document.getElementById('statusBox');
 
     btn.disabled = true;
-    btn.innerText = 'Menyimpan ke OneDrive & Mengirim WA...';
+    btn.innerText = 'Memproses Laporan & Mengirim Notifikasi WA...';
     statusBox.style.display = 'none';
 
     const formData = {
       idMr: document.getElementById('idMr').value,
       tanggal: document.getElementById('tanggal').value,
       namaPop: document.getElementById('namaPop').value,
+      alamatPop: document.getElementById('alamatPop').value,
       targetWa: document.getElementById('targetWa').value.replace(/[^0-9]/g, ''),
       tipePop: 'Super Backbone',
-      plnKapasitas: '33 KVA',
-      bateraiMerk: 'Enersys',
-      bateraiKapasitas: '100',
-      suhuRuangan: '22 °C',
-      kondisiGedung: 'OK'
+      plnKapasitas: document.getElementById('plnKapasitas').value,
+      kwhMcbR: document.getElementById('kwhMcbR').value,
+      rectifierData: [{
+        merk: document.getElementById('rectMerk').value,
+        tipe: document.getElementById('rectTipe').value
+      }],
+      bateraiMerk: document.getElementById('bateraiMerk').value,
+      bateraiKapasitas: document.getElementById('bateraiKapasitas').value,
+      suhuRuangan: document.getElementById('suhuRuangan').value,
+      kondisiGedung: document.getElementById('kondisiGedung').value
     };
 
     try {
@@ -80,22 +153,22 @@
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || 'Gagal memproses data');
+        throw new Error(resData.message || 'Gagal memproses data.');
       }
 
       statusBox.style.display = 'block';
       statusBox.style.backgroundColor = '#d4edda';
       statusBox.style.color = '#155724';
-      statusBox.innerHTML = `✅ ${resData.message}<br><br><a href="${resData.oneDriveUrl}" target="_blank">Buka File di OneDrive</a>`;
+      statusBox.innerText = '✅ ' + resData.message;
 
     } catch (error) {
       statusBox.style.display = 'block';
       statusBox.style.backgroundColor = '#f8d7da';
       statusBox.style.color = '#721c24';
-      statusBox.innerText = '❌ Error: ' + error.message;
+      statusBox.innerText = '❌ ' + error.message;
     } finally {
       btn.disabled = false;
-      btn.innerText = 'Submit Data';
+      btn.innerText = 'Submit Data & Kirim WA Notifikasi';
     }
   });
 </script>
