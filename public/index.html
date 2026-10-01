@@ -3,174 +3,317 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form Laporan PM - Kirim WhatsApp</title>
+  <title>Sistem Informasi Akademik & Data Mahasiswa</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #333; margin-bottom: 20px; }
-    .section-title { font-weight: bold; border-bottom: 2px solid #25D366; margin-top: 15px; padding-bottom: 5px; color: #128C7E; }
-    .form-group { margin-bottom: 12px; }
-    label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 14px; }
-    input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    .row { display: flex; gap: 10px; }
-    .col { flex: 1; }
-    button { width: 100%; padding: 12px; background-color: #25D366; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-    button:hover { background-color: #128C7E; }
-    .status-box { margin-top: 15px; padding: 12px; border-radius: 4px; display: none; text-align: center; font-weight: bold; }
+    .avatar-img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .preview-img {
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
   </style>
 </head>
-<body>
+<body class="bg-light">
 
-<div class="container">
-  <h2>Form Laporan PM POP</h2>
-  <form id="pmForm">
+<div id="app" class="container py-4">
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+      <h2 class="fw-bold text-primary"><i class="bi bi-mortarboard-fill me-2"></i>Data Mahasiswa</h2>
+      <p class="text-muted mb-0">Kelola informasi akademik dan pasfoto mahasiswa</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#studentModal" @click="openAddModal">
+        <i class="bi bi-plus-lg me-1"></i> Tambah Mahasiswa
+      </button>
+    </div>
+  </div>
 
-    <!-- DATA COVER -->
-    <div class="section-title">1. COVER / GENERAL</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="idMr">ID MR:</label>
-        <input type="text" id="idMr" placeholder="MR-2026-001" required>
+  <!-- Filter & Search Bar -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" v-model="searchQuery" placeholder="Cari NIM atau Nama..." @input="currentPage = 1">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <select class="form-select" v-model="filterProdi" @change="currentPage = 1">
+            <option value="">-- Semua Program Studi --</option>
+            <option value="Sistem Informasi">Sistem Informasi</option>
+            <option value="Teknik Informatika">Teknik Informatika</option>
+            <option value="Data Science">Data Science</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" v-model.number="itemsPerPage" @change="currentPage = 1">
+            <option :value="5">5 / hlm</option>
+            <option :value="10">10 / hlm</option>
+            <option :value="20">20 / hlm</option>
+          </select>
+        </div>
       </div>
-      <div class="col form-group">
-        <label for="tanggal">Tanggal PM:</label>
-        <input type="date" id="tanggal" required>
+    </div>
+  </div>
+
+  <!-- Table Data -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-3">Foto</th>
+              <th>NIM</th>
+              <th>Nama Mahasiswa</th>
+              <th>Program Studi</th>
+              <th>Status</th>
+              <th class="text-end pe-3">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="paginatedStudents.length === 0">
+              <td colspan="6" class="text-center py-4 text-muted">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                Tidak ada data mahasiswa yang ditemukan.
+              </td>
+            </tr>
+            <tr v-for="student in paginatedStudents" :key="student.id">
+              <td class="ps-3">
+                <img :src="student.photo || defaultAvatar" alt="Foto" class="avatar-img border">
+              </td>
+              <td class="fw-bold">{{ student.nim }}</td>
+              <td>{{ student.nama }}</td>
+              <td><span class="badge bg-info text-dark">{{ student.prodi }}</span></td>
+              <td>
+                <span class="badge" :class="student.status === 'Aktif' ? 'bg-success' : 'bg-secondary'">
+                  {{ student.status }}
+                </span>
+              </td>
+              <td class="text-end pe-3">
+                <button class="btn btn-sm btn-outline-warning me-1" @click="editStudent(student)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" @click="deleteStudent(student.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="namaPop">Nama POP:</label>
-      <input type="text" id="namaPop" value="GI BANDUNG SELATAN 150KV" required>
-    </div>
-
-    <div class="form-group">
-      <label for="alamatPop">Alamat POP:</label>
-      <input type="text" id="alamatPop" placeholder="Jl. Raya Bandung Selatan No. 10">
-    </div>
-
-    <!-- DATA KWH -->
-    <div class="section-title">2. KWH & PLN</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="plnKapasitas">Kapasitas PLN:</label>
-        <input type="text" id="plnKapasitas" value="33 KVA">
-      </div>
-      <div class="col form-group">
-        <label for="kwhMcbR">MCB Phase R (A):</label>
-        <input type="text" id="kwhMcbR" placeholder="50">
-      </div>
-    </div>
-
-    <!-- DATA RECTIFIER -->
-    <div class="section-title">3. RECTIFIER & BATTERY</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="rectMerk">Merk Rectifier:</label>
-        <input type="text" id="rectMerk" placeholder="Emerson / Vertiv">
-      </div>
-      <div class="col form-group">
-        <label for="rectTipe">Tipe Rectifier:</label>
-        <input type="text" id="rectTipe" placeholder="NetSure 701">
+    <!-- Pagination Footer -->
+    <div class="card-footer bg-white py-3" v-if="totalPages > 0">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+          <small class="text-muted">
+            Menampilkan {{ startItem }} - {{ endItem }} dari total {{ filteredStudents.length }} data
+          </small>
+        </div>
+        <div class="col-md-6">
+          <nav aria-label="Navigasi Halaman">
+            <ul class="pagination pagination-sm justify-content-center justify-content-md-end mb-0">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-item page-link" @click="currentPage--" :disabled="currentPage === 1">
+                  &laquo; Prev
+                </button>
+              </li>
+              <li class="page-item" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }">
+                <button class="page-link" @click="currentPage = page">{{ page }}</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="currentPage++" :disabled="currentPage === totalPages">
+                  Next &raquo;
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="row">
-      <div class="col form-group">
-        <label for="bateraiMerk">Merk Baterai:</label>
-        <input type="text" id="bateraiMerk" placeholder="Enersys">
-      </div>
-      <div class="col form-group">
-        <label for="bateraiKapasitas">Kapasitas Baterai (AH):</label>
-        <input type="text" id="bateraiKapasitas" placeholder="100">
+  <!-- Modal Form Add/Edit -->
+  <div class="modal fade" id="studentModal" tabindex="-1" aria-hidden="true" ref="modalElement">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">{{ isEdit ? 'Edit Data Mahasiswa' : 'Tambah Mahasiswa Baru' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form @submit.prevent="saveStudent">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">NIM</label>
+              <input type="text" class="form-control" v-model="form.nim" required placeholder="Contoh: 043123456">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama Lengkap</label>
+              <input type="text" class="form-control" v-model="form.nama" required placeholder="Nama lengkap mahasiswa">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Program Studi</label>
+              <select class="form-select" v-model="form.prodi" required>
+                <option value="">-- Pilih Prodi --</option>
+                <option value="Sistem Informasi">Sistem Informasi</option>
+                <option value="Teknik Informatika">Teknik Informatika</option>
+                <option value="Data Science">Data Science</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Status</label>
+              <select class="form-select" v-model="form.status" required>
+                <option value="Aktif">Aktif</option>
+                <option value="Non-Aktif">Non-Aktif</option>
+              </select>
+            </div>
+            <!-- Upload Foto -->
+            <div class="mb-3">
+              <label class="form-label">Unggah Pasfoto</label>
+              <input type="file" class="form-control" accept="image/*" @change="handleFileUpload">
+              <div class="mt-2" v-if="form.photo">
+                <p class="small text-muted mb-1">Pratinjau Foto:</p>
+                <img :src="form.photo" class="preview-img border" alt="Preview Foto">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Data</button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
 
-    <!-- ENVIRONMENT -->
-    <div class="section-title">4. ENVIRONMENT</div>
-    <div class="row">
-      <div class="col form-group">
-        <label for="suhuRuangan">Suhu Ruangan (°C):</label>
-        <input type="text" id="suhuRuangan" placeholder="22 °C">
-      </div>
-      <div class="col form-group">
-        <label for="kondisiGedung">Kondisi Gedung:</label>
-        <select id="kondisiGedung">
-          <option value="OK">OK</option>
-          <option value="NOK">NOK</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- WHATSAPP RECIPIENT -->
-    <div class="section-title">5. NOMOR WA TUJUAN</div>
-    <div class="form-group">
-      <label for="targetWa">Nomor WhatsApp Penerima (Kosongkan jika pakai default):</label>
-      <input type="text" id="targetWa" placeholder="Contoh: 628123456789">
-    </div>
-
-    <button type="submit" id="submitBtn">Submit Data & Kirim WA Notifikasi</button>
-  </form>
-
-  <div id="statusBox" class="status-box"></div>
 </div>
 
+<!-- Vue 3 & Bootstrap JS -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/bootstrap.bundle.min.js"></script>
+
 <script>
-  document.getElementById('pmForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    const statusBox = document.getElementById('statusBox');
+  const { createApp } = Vue;
 
-    btn.disabled = true;
-    btn.innerText = 'Memproses Laporan & Mengirim Notifikasi WA...';
-    statusBox.style.display = 'none';
-
-    const formData = {
-      idMr: document.getElementById('idMr').value,
-      tanggal: document.getElementById('tanggal').value,
-      namaPop: document.getElementById('namaPop').value,
-      alamatPop: document.getElementById('alamatPop').value,
-      targetWa: document.getElementById('targetWa').value.replace(/[^0-9]/g, ''),
-      tipePop: 'Super Backbone',
-      plnKapasitas: document.getElementById('plnKapasitas').value,
-      kwhMcbR: document.getElementById('kwhMcbR').value,
-      rectifierData: [{
-        merk: document.getElementById('rectMerk').value,
-        tipe: document.getElementById('rectTipe').value
-      }],
-      bateraiMerk: document.getElementById('bateraiMerk').value,
-      bateraiKapasitas: document.getElementById('bateraiKapasitas').value,
-      suhuRuangan: document.getElementById('suhuRuangan').value,
-      kondisiGedung: document.getElementById('kondisiGedung').value
-    };
-
-    try {
-      const response = await fetch('/api/submit-pm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const resData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(resData.message || 'Gagal memproses data.');
+  createApp({
+    data() {
+      return {
+        students: [
+          { id: 1, nim: '041234561', nama: 'Ahmad Fauzi', prodi: 'Sistem Informasi', status: 'Aktif', photo: '' },
+          { id: 2, nim: '041234562', nama: 'Budi Santoso', prodi: 'Teknik Informatika', status: 'Aktif', photo: '' },
+          { id: 3, nim: '041234563', nama: 'Citra Dewi', prodi: 'Sistem Informasi', status: 'Non-Aktif', photo: '' },
+          { id: 4, nim: '041234564', nama: 'Dina Lestari', prodi: 'Data Science', status: 'Aktif', photo: '' },
+          { id: 5, nim: '041234565', nama: 'Eko Prasetyo', prodi: 'Teknik Informatika', status: 'Aktif', photo: '' },
+          { id: 6, nim: '041234566', nama: 'Fajar Hidayat', prodi: 'Sistem Informasi', status: 'Aktif', photo: '' },
+          { id: 7, nim: '041234567', nama: 'Gita Gutawa', prodi: 'Data Science', status: 'Aktif', photo: '' }
+        ],
+        searchQuery: '',
+        filterProdi: '',
+        currentPage: 1,
+        itemsPerPage: 5,
+        defaultAvatar: 'https://via.placeholder.com/150?text=No+Photo',
+        isEdit: false,
+        modalInstance: null,
+        form: {
+          id: null,
+          nim: '',
+          nama: '',
+          prodi: '',
+          status: 'Aktif',
+          photo: ''
+        }
+      };
+    },
+    computed: {
+      filteredStudents() {
+        return this.students.filter(s => {
+          const matchesSearch = s.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                s.nim.includes(this.searchQuery);
+          const matchesProdi = this.filterProdi === '' || s.prodi === this.filterProdi;
+          return matchesSearch && matchesProdi;
+        });
+      },
+      totalPages() {
+        return Math.ceil(this.filteredStudents.length / this.itemsPerPage) || 1;
+      },
+      paginatedStudents() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return this.filteredStudents.slice(start, end);
+      },
+      startItem() {
+        if (this.filteredStudents.length === 0) return 0;
+        return (this.currentPage - 1) * this.itemsPerPage + 1;
+      },
+      endItem() {
+        const end = this.currentPage * this.itemsPerPage;
+        return end > this.filteredStudents.length ? this.filteredStudents.length : end;
       }
-
-      statusBox.style.display = 'block';
-      statusBox.style.backgroundColor = '#d4edda';
-      statusBox.style.color = '#155724';
-      statusBox.innerText = '✅ ' + resData.message;
-
-    } catch (error) {
-      statusBox.style.display = 'block';
-      statusBox.style.backgroundColor = '#f8d7da';
-      statusBox.style.color = '#721c24';
-      statusBox.innerText = '❌ ' + error.message;
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'Submit Data & Kirim WA Notifikasi';
+    },
+    methods: {
+      openAddModal() {
+        this.isEdit = false;
+        this.form = { id: null, nim: '', nama: '', prodi: '', status: 'Aktif', photo: '' };
+      },
+      handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.form.photo = e.target.result; // Mengubah foto menjadi format Base64
+          };
+          reader.readAsDataURL(file);
+        }
+      },
+      saveStudent() {
+        if (this.isEdit) {
+          const index = this.students.findIndex(s => s.id === this.form.id);
+          if (index !== -1) {
+            this.students[index] = { ...this.form };
+          }
+        } else {
+          const newStudent = {
+            ...this.form,
+            id: Date.now()
+          };
+          this.students.unshift(newStudent);
+        }
+        
+        // Tutup Modal
+        const modalEl = document.getElementById('studentModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+      },
+      editStudent(student) {
+        this.isEdit = true;
+        this.form = { ...student };
+        const modalEl = document.getElementById('studentModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      },
+      deleteStudent(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+          this.students = this.students.filter(s => s.id !== id);
+          if (this.currentPage > this.totalPages && this.totalPages > 0) {
+            this.currentPage = this.totalPages;
+          }
+        }
+      }
     }
-  });
+  }).mount('#app');
 </script>
 
 </body>
