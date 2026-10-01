@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // 1. Sajikan file statis frontend dari folder public
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-// 2. Route Halaman Utama (Index)
+// 2. Route Halaman Utama
 app.get('/', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
@@ -21,21 +21,18 @@ app.post('/api/submit-pm', async (req, res) => {
   try {
     const data = req.body;
     
-    // Path dinamis mengecek beberapa alternatif nama/lokasi file Excel
-    let templatePath = path.join(process.cwd(), 'public', 'templates', 'Template_PM_Bandung_Selatan.xlsx');
+    // Pencarian path file template Excel yang aman di Serverless Vercel
+    const possiblePaths = [
+      path.join(__dirname, '..', 'public', 'templates', 'Template_PM_Bandung_Selatan.xlsx'),
+      path.join(process.cwd(), 'public', 'templates', 'Template_PM_Bandung_Selatan.xlsx'),
+      path.join(process.cwd(), 'public', 'templates', 'BANDUNG_SELATAN_GI_150KV.xlsx'),
+      path.join(process.cwd(), 'templates', 'BANDUNG_SELATAN_GI_150KV.xlsx')
+    ];
 
-    if (!fs.existsSync(templatePath)) {
-      templatePath = path.join(process.cwd(), 'public', 'templates', 'BANDUNG_SELATAN_GI_150KV.xlsx');
-    }
-    if (!fs.existsSync(templatePath)) {
-      templatePath = path.join(process.cwd(), 'templates', 'Template_PM_Bandung_Selatan.xlsx');
-    }
-    if (!fs.existsSync(templatePath)) {
-      templatePath = path.join(process.cwd(), 'BANDUNG_SELATAN_GI_150KV.xlsx');
-    }
+    let templatePath = possiblePaths.find(p => fs.existsSync(p));
 
-    if (!fs.existsSync(templatePath)) {
-      console.error('File template Excel tidak ditemukan!');
+    if (!templatePath) {
+      console.error('File template Excel tidak ditemukan pada lokasi:', possiblePaths);
       return res.status(500).json({
         success: false,
         message: 'File template Excel tidak ditemukan di server Vercel.'
@@ -112,23 +109,22 @@ app.post('/api/submit-pm', async (req, res) => {
       sheetEnv.getCell('F4').value = data.kondisiGedung === 'NOK' ? 'V' : '';
     }
 
-    // Generate Excel Buffer untuk Serverless
+    // Generate Excel Buffer
     const buffer = await workbook.xlsx.writeBuffer();
     const cleanPopName = (data.namaPop || 'BANDUNG_SELATAN').replace(/[^a-zA-Z0-9]/g, '_');
     const fileName = `PM_${cleanPopName}_${Date.now()}.xlsx`;
 
-    // Response Download Excel
+    // Direct Download Response
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     return res.send(buffer);
 
   } catch (error) {
     console.error('Error Vercel Serverless Excel:', error);
-    res.status(500).json({ success: false, message: 'Gagal memproses template Excel di Vercel.' });
+    res.status(500).json({ success: false, message: 'Gagal memproses Laporan PM di Server.' });
   }
 });
 
-// Listener untuk Testing Local (node api/index.js)
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

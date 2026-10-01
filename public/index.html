@@ -3,678 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulir Preventive Maintenance POP</title>
+  <title>Form Preventive Maintenance (PM)</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-    body {
-      background-color: #f4f6f9;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h2, h3, h4, h5 {
-      color: #333;
-      margin-top: 0;
-    }
-    .nav-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #eee;
-    }
-    .page-indicator {
-      font-weight: bold;
-      color: #007bff;
-    }
-    .form-page {
-      display: none;
-    }
-    .form-page.active {
-      display: block;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-      color: #555;
-    }
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .row {
-      display: flex;
-      gap: 15px;
-    }
-    .row .form-group {
-      flex: 1;
-    }
-    .dynamic-card {
-      background: #fdfdfd;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 15px;
-      margin-bottom: 15px;
-      position: relative;
-    }
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .btn-primary { background-color: #007bff; color: white; }
-    .btn-secondary { background-color: #6c757d; color: white; }
-    .btn-success { background-color: #28a745; color: white; }
-    .btn-danger { background-color: #dc3545; color: white; }
-    .btn-add { background-color: #17a2b8; color: white; margin-bottom: 15px; }
-    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
-    
-    .button-group {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 25px;
-    }
-
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-      .container { padding: 15px; }
-      .row {
-        flex-direction: column;
-        gap: 0;
-      }
-      .button-group {
-        flex-direction: column-reverse;
-        gap: 10px;
-      }
-      .button-group .btn {
-        width: 100%;
-      }
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+    button:hover { background-color: #218838; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="nav-bar">
-    <span class="page-indicator" id="pageTitle">Halaman 1: Cover & Data Umum</span>
-    <span id="pageCounter">1 / 13</span>
-  </div>
-
+  <h2>Form Laporan PM</h2>
   <form id="pmForm">
-    
-    <!-- PAGE 1: COVER -->
-    <div class="form-page active" data-title="Halaman 1: Cover & Data Umum">
-      <h3>Data Umum POP</h3>
-      <div class="form-group">
-        <label>ID MR / Nomor Ticket</label>
-        <input type="text" name="idMr" required placeholder="Contoh: MR-2026-001">
-      </div>
-      <div class="row">
-        <div class="form-group">
-          <label>Tanggal Pelaksanaan</label>
-          <input type="date" name="tanggal" required>
-        </div>
-        <div class="form-group">
-          <label>Nama POP</label>
-          <input type="text" name="namaPop" required placeholder="Nama Lokasi POP">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Alamat POP</label>
-        <textarea name="alamatPop" rows="2" required></textarea>
-      </div>
-      <div class="row">
-        <div class="form-group">
-          <label>Koordinat POP</label>
-          <input type="text" name="koordinatPop" placeholder="-6.9175, 107.6191">
-        </div>
-        <div class="form-group">
-          <label>Tipe POP</label>
-          <select name="tipePop">
-            <option value="Super Backbone">Super Backbone</option>
-            <option value="Backbone">Backbone</option>
-            <option value="Distribution">Distribution</option>
-            <option value="Access">Access</option>
-          </select>
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="idMr">ID MR:</label>
+      <input type="text" id="idMr" name="idMr" placeholder="Contoh: MR-2026-001" required>
     </div>
 
-    <!-- PAGE 2: SUMMARY KLASIFIKASI -->
-    <div class="form-page" data-title="Halaman 2: Summary Klasifikasi Temp/Temuan">
-      <h3>Summary Klasifikasi Temuan</h3>
-      <div class="row">
-        <div class="form-group">
-          <label>Jumlah Temuan Critical</label>
-          <input type="number" name="countCritical" value="0" min="0">
-        </div>
-        <div class="form-group">
-          <label>Jumlah Temuan Major</label>
-          <input type="number" name="countMajor" value="0" min="0">
-        </div>
-        <div class="form-group">
-          <label>Jumlah Temuan Minor</label>
-          <input type="number" name="countMinor" value="0" min="0">
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="tanggal">Tanggal PM:</label>
+      <input type="date" id="tanggal" name="tanggal" required>
     </div>
 
-    <!-- PAGE 3: CHECKLIST LOKASI -->
-    <div class="form-page" data-title="Halaman 3: Checklist Lokasi & Lingkungan">
-      <h3>Checklist Lokasi POP</h3>
-      <div class="row">
-        <div class="form-group">
-          <label>Suhu Ruangan (°C)</label>
-          <input type="number" name="suhuRuangan" placeholder="Contoh: 22">
-        </div>
-        <div class="form-group">
-          <label>Kondisi Bangunan / Gedung</label>
-          <select name="kondisiGedung">
-            <option value="OK">OK / Baik</option>
-            <option value="NOK">NOK / Perlu Perbaikan</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Kebersihan Ruangan</label>
-        <select name="kebersihanRuangan">
-          <option value="OK">OK / Bersih</option>
-          <option value="NOK">NOK / Kotor</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label for="namaPop">Nama POP / Location:</label>
+      <input type="text" id="namaPop" name="namaPop" value="GI BANDUNG SELATAN 150KV" required>
     </div>
 
-    <!-- PAGE 4: PLN & KWH -->
-    <div class="form-page" data-title="Halaman 4: PLN & KWH Meter">
-      <h3>Pemeriksaan KWH & PLN</h3>
-      <div class="row">
-        <div class="form-group">
-          <label>Kapasitas PLN (VA)</label>
-          <input type="number" name="plnKapasitas" placeholder="Contoh: 11000">
-        </div>
-        <div class="form-group">
-          <label>Stand KWH Meter</label>
-          <input type="number" name="kwhStand" placeholder="Angka di Meteran">
-        </div>
-      </div>
-      <h4>Kapasitas MCB PLN</h4>
-      <div class="row">
-        <div class="form-group">
-          <label>Fasa R (A)</label>
-          <input type="number" name="kwhMcbR">
-        </div>
-        <div class="form-group">
-          <label>Fasa S (A)</label>
-          <input type="number" name="kwhMcbS">
-        </div>
-        <div class="form-group">
-          <label>Fasa T (A)</label>
-          <input type="number" name="kwhMcbT">
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="alamatPop">Alamat POP:</label>
+      <input type="text" id="alamatPop" name="alamatPop" placeholder="Jl. Raya Bandung Selatan No. 10">
     </div>
 
-    <!-- PAGE 5: PANEL ATS / AMF -->
-    <div class="form-page" data-title="Halaman 5: Panel ATS / AMF">
-      <h3>Pemeriksaan Panel ATS / AMF</h3>
-      <div class="form-group">
-        <label>Status Panel ATS</label>
-        <select name="atsStatus">
-          <option value="Auto">Auto</option>
-          <option value="Manual">Manual</option>
-          <option value="Bypass">Bypass</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Catatan ATS</label>
-        <textarea name="atsCatatan" rows="2"></textarea>
-      </div>
+    <div class="form-group">
+      <label for="waNumber">Nomor WhatsApp Tujuan (Kirim Laporan):</label>
+      <input type="text" id="waNumber" name="waNumber" placeholder="628123456789" required>
     </div>
 
-    <!-- PAGE 6: RECTIFIER & MCB (DYNAMIC) -->
-    <div class="form-page" data-title="Halaman 6: Sheet Rectifier & Detail MCB">
-      <h3>Detail Rectifier & Output MCB</h3>
-      <button type="button" class="btn btn-add" id="btnAddRectifier">+ Tambah Unit Rectifier</button>
-      <div id="rectifierContainer"></div>
-    </div>
-
-    <!-- PAGE 7: BATERAI -->
-    <div class="form-page" data-title="Halaman 7: Bank Baterai">
-      <h3>Pemeriksaan Bank Baterai</h3>
-      <div class="row">
-        <div class="form-group">
-          <label>Merk Baterai</label>
-          <input type="text" name="bateraiMerk">
-        </div>
-        <div class="form-group">
-          <label>Kapasitas (Ah)</label>
-          <input type="number" name="bateraiKapasitas">
-        </div>
-        <div class="form-group">
-          <label>Jumlah Cell / Block</label>
-          <input type="number" name="bateraiJumlahBlock">
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE 8: GENSET (DYNAMIC) -->
-    <div class="form-page" data-title="Halaman 8: Detail Genset">
-      <h3>Pemeriksaan Unit Genset</h3>
-      <button type="button" class="btn btn-add" id="btnAddGenset">+ Tambah Genset</button>
-      <div id="gensetContainer"></div>
-    </div>
-
-    <!-- PAGE 9: AC & PENDINGIN (DYNAMIC) -->
-    <div class="form-page" data-title="Halaman 9: AC & Pendingin Ruangan">
-      <h3>Sistem AC / Pendingin</h3>
-      <button type="button" class="btn btn-add" id="btnAddAc">+ Tambah Unit AC</button>
-      <div id="acContainer"></div>
-    </div>
-
-    <!-- PAGE 10: UPS (DYNAMIC) -->
-    <div class="form-page" data-title="Halaman 10: System UPS">
-      <h3>Pemeriksaan Perangkat UPS</h3>
-      <button type="button" class="btn btn-add" id="btnAddUps">+ Tambah UPS</button>
-      <div id="upsContainer"></div>
-    </div>
-
-    <!-- PAGE 11: PERANGKAT AKTIF (DYNAMIC) -->
-    <div class="form-page" data-title="Halaman 11: Perangkat Aktif & Network">
-      <h3>Perangkat Aktif (Switch, Router, OLT)</h3>
-      <button type="button" class="btn btn-add" id="btnAddPerangkat">+ Tambah Perangkat</button>
-      <div id="perangkatContainer"></div>
-    </div>
-
-    <!-- PAGE 12: DETAIL TEMUAN MAINTENANCE -->
-    <div class="form-page" data-title="Halaman 12: Temuan Preventive Maintenance">
-      <h3>Detail Temuan Maintenance</h3>
-      <div class="form-group">
-        <label>Kategori Temuan</label>
-        <select name="temuanKategori">
-          <option value="Power">Power (PLN/Rectifier/Genset)</option>
-          <option value="Environment">Environment / Lingkungan</option>
-          <option value="Network">Network / Perangkat Aktif</option>
-          <option value="Security">Security / Keamanan</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Deskripsi Temuan</label>
-        <textarea name="temuanDeskripsi" rows="3"></textarea>
-      </div>
-    </div>
-
-    <!-- PAGE 13: PENUTUP & SIMPAN -->
-    <div class="form-page" data-title="Halaman 13: Penutup & Submit">
-      <h3>Rekomendasi & Penutup</h3>
-      <div class="form-group">
-        <label>Rekomendasi / Tindak Lanjut</label>
-        <textarea name="rekomendasi" rows="3" placeholder="Masukkan saran perbaikan..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Nama Petugas PM</label>
-        <input type="text" name="namaPetugas" required>
-      </div>
-    </div>
-
-    <!-- BUTTON NAVIGATION -->
-    <div class="button-group">
-      <button type="button" class="btn btn-secondary" id="btnPrev" disabled>Sebelumnya</button>
-      <button type="button" class="btn btn-primary" id="btnNext">Selanjutnya</button>
-      <button type="submit" class="btn btn-success" id="btnSubmit" style="display: none;">Submit & Kirim Data</button>
-    </div>
-
+    <button type="submit" id="submitBtn">Generate & Kirim via WhatsApp</button>
   </form>
 </div>
 
 <script>
-  let currentPage = 1;
-  const totalPages = 13;
-
-  const pages = document.querySelectorAll('.form-page');
-  const pageTitle = document.getElementById('pageTitle');
-  const pageCounter = document.getElementById('pageCounter');
-  const btnPrev = document.getElementById('btnPrev');
-  const btnNext = document.getElementById('btnNext');
-  const btnSubmit = document.getElementById('btnSubmit');
-
-  function updatePage() {
-    pages.forEach((page, index) => {
-      page.classList.toggle('active', index === (currentPage - 1));
-    });
-
-    const activePage = pages[currentPage - 1];
-    pageTitle.textContent = activePage.getAttribute('data-title');
-    pageCounter.textContent = `${currentPage} / ${totalPages}`;
-
-    btnPrev.disabled = (currentPage === 1);
-    
-    if (currentPage === totalPages) {
-      btnNext.style.display = 'none';
-      btnSubmit.style.display = 'inline-block';
-    } else {
-      btnNext.style.display = 'inline-block';
-      btnSubmit.style.display = 'none';
-    }
-  }
-
-  // Next Page Handler
-  btnNext.addEventListener('click', () => {
-    const activePage = pages[currentPage - 1];
-    const requiredInputs = activePage.querySelectorAll('input[required], select[required], textarea[required]');
-    let isValid = true;
-
-    requiredInputs.forEach(input => {
-      if (!input.checkValidity()) {
-        input.reportValidity();
-        isValid = false;
-      }
-    });
-
-    if (isValid && currentPage < totalPages) {
-      currentPage++;
-      updatePage();
-      window.scrollTo(0, 0);
-    }
-  });
-
-  // Prev Page Handler
-  btnPrev.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      updatePage();
-      window.scrollTo(0, 0);
-    }
-  });
-
-  // --- LOGIKA DYNAMIC ITEM ADDITION ---
-
-  // 1. RECTIFIER & MCB
-  let rectCount = 0;
-  document.getElementById('btnAddRectifier').addEventListener('click', () => {
-    rectCount++;
-    const rectIndex = rectCount - 1;
-    const container = document.getElementById('rectifierContainer');
-    const card = document.createElement('div');
-    card.className = 'dynamic-card';
-    card.setAttribute('data-rect-index', rectIndex);
-    card.innerHTML = `
-      <h4>Unit Rectifier #${rectCount}</h4>
-      <div class="row">
-        <div class="form-group">
-          <label>Merk Rectifier</label>
-          <input type="text" class="rect-merk" placeholder="Vertiv / Emerson / Eltek">
-        </div>
-        <div class="form-group">
-          <label>Tipe / Model</label>
-          <input type="text" class="rect-tipe" placeholder="NetSure 701">
-        </div>
-      </div>
-      <h5>Output MCB Load Unit #${rectCount}</h5>
-      <div class="mcb-list" id="mcbContainer_${rectIndex}"></div>
-      <button type="button" class="btn btn-secondary" onclick="addMcbItem(${rectIndex})">+ Tambah MCB</button>
-      <br><br>
-      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Hapus Rectifier Unit Ini</button>
-    `;
-    container.appendChild(card);
-    addMcbItem(rectIndex);
-  });
-
-  window.addMcbItem = function(rectIdx) {
-    const mcbContainer = document.getElementById(`mcbContainer_${rectIdx}`);
-    const div = document.createElement('div');
-    div.className = 'row mcb-row';
-    div.style.marginBottom = '10px';
-    div.innerHTML = `
-      <div class="form-group">
-        <input type="number" class="mcb-cap" placeholder="Kapasitas (A)">
-      </div>
-      <div class="form-group">
-        <input type="text" class="mcb-peruntukan" placeholder="Peruntukan Load">
-      </div>
-      <div class="form-group">
-        <input type="number" step="0.1" class="mcb-load" placeholder="Beban (A)">
-      </div>
-      <div style="flex:0;">
-        <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">X</button>
-      </div>
-    `;
-    mcbContainer.appendChild(div);
-  };
-
-  // 2. GENSET
-  let gensetCount = 0;
-  document.getElementById('btnAddGenset').addEventListener('click', () => {
-    gensetCount++;
-    const container = document.getElementById('gensetContainer');
-    const card = document.createElement('div');
-    card.className = 'dynamic-card genset-card';
-    card.innerHTML = `
-      <h4>Unit Genset #${gensetCount}</h4>
-      <div class="row">
-        <div class="form-group">
-          <label>Merk Genset</label>
-          <input type="text" class="genset-merk">
-        </div>
-        <div class="form-group">
-          <label>Kapasitas (kVA)</label>
-          <input type="number" class="genset-kapasitas">
-        </div>
-      </div>
-      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Hapus Genset</button>
-    `;
-    container.appendChild(card);
-  });
-
-  // 3. AC / PENDINGIN
-  let acCount = 0;
-  document.getElementById('btnAddAc').addEventListener('click', () => {
-    acCount++;
-    const container = document.getElementById('acContainer');
-    const card = document.createElement('div');
-    card.className = 'dynamic-card ac-card';
-    card.innerHTML = `
-      <h4>Unit AC #${acCount}</h4>
-      <div class="row">
-        <div class="form-group">
-          <label>Merk AC</label>
-          <input type="text" class="ac-merk">
-        </div>
-        <div class="form-group">
-          <label>Kapasitas (PK)</label>
-          <input type="text" class="ac-kapasitas">
-        </div>
-      </div>
-      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Hapus AC</button>
-    `;
-    container.appendChild(card);
-  });
-
-  // 4. UPS
-  let upsCount = 0;
-  document.getElementById('btnAddUps').addEventListener('click', () => {
-    upsCount++;
-    const container = document.getElementById('upsContainer');
-    const card = document.createElement('div');
-    card.className = 'dynamic-card ups-card';
-    card.innerHTML = `
-      <h4>Unit UPS #${upsCount}</h4>
-      <div class="row">
-        <div class="form-group">
-          <label>Merk UPS</label>
-          <input type="text" class="ups-merk">
-        </div>
-        <div class="form-group">
-          <label>Kapasitas (VA/kVA)</label>
-          <input type="text" class="ups-kapasitas">
-        </div>
-      </div>
-      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Hapus UPS</button>
-    `;
-    container.appendChild(card);
-  });
-
-  // 5. PERANGKAT AKTIF
-  let devCount = 0;
-  document.getElementById('btnAddPerangkat').addEventListener('click', () => {
-    devCount++;
-    const container = document.getElementById('perangkatContainer');
-    card = document.createElement('div');
-    card.className = 'dynamic-card dev-card';
-    card.innerHTML = `
-      <h4>Perangkat Aktif #${devCount}</h4>
-      <div class="row">
-        <div class="form-group">
-          <label>Nama / Tipe Perangkat</label>
-          <input type="text" class="dev-nama" placeholder="Contoh: Switch Cisco 2960">
-        </div>
-        <div class="form-group">
-          <label>Status Operasional</label>
-          <select class="dev-status">
-            <option value="Normal">Normal</option>
-            <option value="Alarm">Alarm / Warning</option>
-            <option value="Off">Off / Down</option>
-          </select>
-        </div>
-      </div>
-      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Hapus Perangkat</button>
-    `;
-    container.appendChild(card);
-  });
-
-  // --- SUBMIT HANDLER (FETCH JSON TO DOWNLOAD EXCEL BUFFER) ---
   document.getElementById('pmForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = 'Memproses Laporan...';
 
-    const btnSubmit = document.getElementById('btnSubmit');
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = 'Memproses & Mengunduh Excel...';
+    const formData = {
+      idMr: document.getElementById('idMr').value,
+      tanggal: document.getElementById('tanggal').value,
+      namaPop: document.getElementById('namaPop').value,
+      alamatPop: document.getElementById('alamatPop').value,
+      koordinatPop: '-',
+      tipePop: 'Super Backbone',
+      plnKapasitas: '33 KVA',
+      bateraiMerk: 'Enersys',
+      bateraiKapasitas: '100',
+      suhuRuangan: '22 C',
+      kondisiGedung: 'OK'
+    };
 
-    // 1. Ambil data form standar
-    const formData = new FormData(this);
-    const data = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
+    const targetWa = document.getElementById('waNumber').value.replace(/[^0-9]/g, '');
 
-    // 2. Extract Rectifier Data
-    data.rectifierData = [];
-    document.querySelectorAll('#rectifierContainer .dynamic-card').forEach(card => {
-      const merk = card.querySelector('.rect-merk')?.value || '';
-      const tipe = card.querySelector('.rect-tipe')?.value || '';
-      const mcbs = [];
-      card.querySelectorAll('.mcb-row').forEach(row => {
-        mcbs.push({
-          cap: row.querySelector('.mcb-cap')?.value || '',
-          peruntukan: row.querySelector('.mcb-peruntukan')?.value || '',
-          load: row.querySelector('.mcb-load')?.value || ''
-        });
-      });
-      data.rectifierData.push({ merk, tipe, mcbs });
-    });
-
-    // 3. Extract AC Data
-    data.acList = [];
-    document.querySelectorAll('#acContainer .ac-card').forEach(card => {
-      data.acList.push({
-        merk: card.querySelector('.ac-merk')?.value || '',
-        kapasitas: card.querySelector('.ac-kapasitas')?.value || ''
-      });
-    });
-
-    // 4. Extract Genset Data
-    data.gensetList = [];
-    document.querySelectorAll('#gensetContainer .genset-card').forEach(card => {
-      data.gensetList.push({
-        merk: card.querySelector('.genset-merk')?.value || '',
-        kapasitas: card.querySelector('.genset-kapasitas')?.value || ''
-      });
-    });
-
-    // 5. Extract UPS Data
-    data.upsList = [];
-    document.querySelectorAll('#upsContainer .ups-card').forEach(card => {
-      data.upsList.push({
-        merk: card.querySelector('.ups-merk')?.value || '',
-        kapasitas: card.querySelector('.ups-kapasitas')?.value || ''
-      });
-    });
-
-    // 6. Extract Perangkat Data
-    data.devList = [];
-    document.querySelectorAll('#perangkatContainer .dev-card').forEach(card => {
-      data.devList.push({
-        nama: card.querySelector('.dev-nama')?.value || '',
-        status: card.querySelector('.dev-status')?.value || 'Normal'
-      });
-    });
-
-    // 7. Kirim ke Backend API Vercel
     try {
       const response = await fetch('/api/submit-pm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(formData)
       });
 
       if (!response.ok) {
-        throw new Error('Gagal memproses Laporan PM di Server');
+        const errData = await response.json();
+        throw new Error(errData.message || 'Gagal memproses Laporan PM di Server');
       }
 
-      // Download Stream Excel
+      // 1. Download File Excel Otomatis
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = `Laporan_PM_${data.namaPop || 'POP'}.xlsx`;
-      if (contentDisposition && contentDisposition.includes('filename=')) {
-        filename = contentDisposition.split('filename=')[1].replace(/"/g, '');
-      }
-
-      a.download = filename;
+      a.download = `PM_${formData.namaPop.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
 
-      alert('Laporan PM Berhasil Dibuat dan Diunduh!');
-    } catch (err) {
-      console.error(err);
-      alert('Terjadi kesalahan: ' + err.message);
+      // 2. Redirect / Buka WhatsApp dengan Ringkasan Teks
+      const teksWA = `*LAPORAN PREVENTIVE MAINTENANCE*%0A` +
+                     `----------------------------------%0A` +
+                     `*ID MR:* ${formData.idMr}%0A` +
+                     `*Tanggal:* ${formData.tanggal}%0A` +
+                     `*POP:* ${formData.namaPop}%0A` +
+                     `*Alamat:* ${formData.alamatPop || '-'}%0A` +
+                     `*Suhu Ruangan:* ${formData.suhuRuangan}%0A` +
+                     `----------------------------------%0A` +
+                     `_File Excel Laporan PM telah berhasil di-generate dan diunduh secara otomatis._`;
+
+      window.open(`https://wa.me/${targetWa}?text=${teksWA}`, '_blank');
+
+    } catch (error) {
+      alert('Terjadi kesalahan: ' + error.message);
     } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Submit & Kirim Data';
+      btn.disabled = false;
+      btn.innerText = 'Generate & Kirim via WhatsApp';
     }
   });
-
-  // Initial UI Render
-  updatePage();
 </script>
 
 </body>
