@@ -11,4 +11,5 @@ uploads/
 *.xlsx
 
 # KECUALI file template Excel utama Anda (agar tetap ter-upload ke GitHub)
+!public/templates/Template_PM_Bandung_Selatan.xlsx
 !BANDUNG SELATAN GI 150KV_2.xlsx
