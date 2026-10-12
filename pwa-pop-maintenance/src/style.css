@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* Kustomisasi Tema PLN & PWA */
+@theme {
+  --color-pln-blue: #00A2E9;
+  --color-pln-dark: #1B365D;
+  --color-pln-yellow: #FFF000;
+}
+
+/* Custom Scrollbar untuk Mobile Stepper Nav */
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  -webkit-tap-highlight-color: transparent;
+}
