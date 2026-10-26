@@ -1,3 +1,4 @@
+JavaScript
 import pdfMake from 'pdfmake/build/pdfmake'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
 
@@ -377,4 +378,423 @@ export async function generatePMPdf(data) {
                     ]
                   ]
                 },
-                layout
+                layout: 'noBorders'
+              }
+            ],
+            [
+              'COS',
+              {
+                table: {
+                  widths: ['50%', '50%'],
+                  body: [[kwh.cos_phi_status || 'Ada', `Tipe : ${kwh.cos_phi_tipe || ''}`]]
+                },
+                layout: 'noBorders'
+              }
+            ],
+            [
+              'Arester',
+              {
+                table: {
+                  widths: ['50%', '50%'],
+                  body: [[kwh.arester_status || 'Ada', `Tipe : ${kwh.arester_tipe || ''}`]]
+                },
+                layout: 'noBorders'
+              }
+            ],
+            [
+              'Kabel output KWH',
+              {
+                table: {
+                  widths: ['50%', '50%'],
+                  body: [
+                    [
+                      `Warna :\nR : ${kwh.kabel_r_warna || 'Merah'}\nS : ${kwh.kabel_s_warna || 'Kuning'}\nT : ${kwh.kabel_t_warna || 'Hitam'}\nN : ${kwh.kabel_n_warna || 'Hijau'}\nG : ${kwh.kabel_g_warna || 'Kuning Hijau'}`,
+                      `Luas Penampang Kabel :\nR (mm) : ${kwh.kabel_r_mm || ''}\nS (mm) : ${kwh.kabel_s_mm || ''}\nT (mm) : ${kwh.kabel_t_mm || ''}\nN (mm) : ${kwh.kabel_n_mm || ''}\nG (mm) : ${kwh.kabel_g_mm || ''}`
+                    ]
+                  ]
+                },
+                layout: 'noBorders'
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: [
+            [
+              { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+              kwhImages.length > 0
+                ? { stack: kwhImages }
+                : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: `Comments : ${kwh.comments || ''}`,
+                bold: true,
+                margin: [0, 5, 0, 20]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+
+      { text: '', pageBreak: 'after' },
+
+      // ================= PAGE 4: GENSET =================
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: 'Main AC Power Information (Genset)',
+                style: 'sectionTitleHeader',
+                alignment: 'center',
+                fillColor: '#808080',
+                color: '#ffffff',
+                bold: true,
+                margin: [0, 4, 0, 4]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1.5,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        }
+      },
+      {
+        table: {
+          widths: ['5%', '20%', '75%'],
+          body: [
+            [
+              { text: '1', alignment: 'center', bold: true, margin: [0, 25, 0, 0] },
+              { text: 'General', alignment: 'center', bold: true, margin: [0, 25, 0, 0] },
+              {
+                table: {
+                  widths: ['30%', '70%'],
+                  body: [
+                    ['Merk', genset.merk || '-'],
+                    ['Kapasitas', `${genset.kapasitas_kva || '-'} KVA`],
+                    ['SN', genset.sn || '-'],
+                    ['Fuel Level', `${genset.fuel_level_liter || '-'} liter`],
+                    ['Hour Meter', `${genset.hour_meter || '-'} hour`],
+                    ['Engine', genset.engine_status || '-'],
+                    ['Accu', genset.accu_status || '-'],
+                    ['Switch', isAuto],
+                    ['Temperatur', `${genset.temperatur || '-'} °C`]
+                  ]
+                },
+                layout: 'noBorders'
+              }
+            ],
+            [
+              { text: '2', alignment: 'center', bold: true, margin: [0, 20, 0, 0] },
+              { text: 'Pengukuran', alignment: 'center', bold: true, margin: [0, 20, 0, 0] },
+              {
+                table: {
+                  widths: ['30%', '70%'],
+                  body: [
+                    [{ text: 'Beban', bold: true }, `Voltage: ${genset.beban_voltage || '-'} V\nAmpere: ${genset.beban_ampere || '-'} A`],
+                    [{ text: 'Tanpa Beban', bold: true }, `Voltage: ${genset.tanpa_beban_voltage || '-'} V\nAmpere: ${genset.tanpa_beban_ampere || '-'} A`]
+                  ]
+                },
+                layout: 'noBorders'
+              }
+            ],
+            [
+              { text: '3', alignment: 'center', bold: true, margin: [0, 10, 0, 0] },
+              { text: 'Term', alignment: 'center', bold: true, margin: [0, 10, 0, 0] },
+              {
+                table: {
+                  widths: ['100%'],
+                  body: [
+                    [`Kondisi Ruangan Genset:\n• Kebersihan: ${genset.kebersihan || 'Bersih'}\n• Temperatur/Suhu: ${genset.suhu_ruangan || 'Normal'}`]
+                  ]
+                },
+                layout: 'noBorders'
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: [
+            [
+              { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+              gensetImages.length > 0
+                ? { stack: gensetImages }
+                : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: `Comments : ${genset.comments || 'TIDAK ADA GENSET'}`,
+                bold: true,
+                margin: [0, 5, 0, 20]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+
+      { text: '', pageBreak: 'after' },
+
+      // ================= PAGE 5: AIR CONDITIONER =================
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: 'AIR CONDITIONER',
+                style: 'sectionTitleHeader',
+                alignment: 'center',
+                fillColor: '#808080',
+                color: '#ffffff',
+                bold: true,
+                margin: [0, 4, 0, 4]
+              }
+            ],
+            [
+              {
+                text: `JUMLAH AC ICON : ${acList.length}`,
+                bold: true,
+                margin: [2, 2, 0, 2]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1.5,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        }
+      },
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: acTableRows.length > 0 ? acTableRows : [[{ text: 'Tidak ada data AC', colSpan: 2, alignment: 'center' }, '']]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: [
+            [
+              { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+              acImages.length > 0
+                ? { stack: acImages }
+                : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: `Comments : ${data?.ac_comments || ''}`,
+                bold: true,
+                margin: [0, 5, 0, 20]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+
+      { text: '', pageBreak: 'after' },
+
+      // ================= PAGE 6: ACPDB =================
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: 'ACPDB',
+                style: 'sectionTitleHeader',
+                alignment: 'center',
+                fillColor: '#808080',
+                color: '#ffffff',
+                bold: true,
+                margin: [0, 4, 0, 4]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1.5,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        }
+      },
+      {
+        table: {
+          widths: ['15%', '10%', '25%', '15%', '15%', '20%'],
+          body: acpdbRows
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: [
+            [
+              { text: 'Arester', bold: true },
+              `Tipe : ${acpdb.arester_tipe || '-'}\nWarna indikator : ${acpdb.arester_warna || '-'}`
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: [
+            [
+              { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+              acpdbImages.length > 0
+                ? { stack: acpdbImages }
+                : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: `Comments : ${acpdb.comments || ''}`,
+                bold: true,
+                margin: [0, 5, 0, 20]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      }
+    ],
+    styles: {
+      coverHeaderTitle: { fontSize: 14, bold: true, color: '#000000' },
+      brandFallback: { fontSize: 18, bold: true, color: '#00A2E9' },
+      sectionTitleHeader: { fontSize: 13, bold: true }
+    }
+  }
+
+  // Mengembalikan instance pdfMake untuk Halaman 1 s/d 6
+  return pdfMake.createPdf(docDefinition)
+}
