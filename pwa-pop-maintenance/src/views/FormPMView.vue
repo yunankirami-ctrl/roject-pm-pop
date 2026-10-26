@@ -1,13 +1,23 @@
 <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePmStore } from '../stores/usePmStore'
+import { supabase } from '../utils/supabaseClient'
+
 import StepCover from '../components/StepCover.vue'
 import StepGrounding from '../components/StepGrounding.vue'
 import StepKwh from '../components/StepKwh.vue'
 import StepGenset from '../components/StepGenset.vue'
 import StepAC from '../components/StepAC.vue'
-import StepAcpdb from '../components/StepAcpdb.vue' // Tambahkan import
+import StepAcpdb from '../components/StepAcpdb.vue'
 import StepPowerDist from '../components/StepPowerDist.vue'
 import StepBattery from '../components/StepBattery.vue'
 import StepEnvironment from '../components/StepEnvironment.vue'
+
+const store = usePmStore()
+const router = useRouter()
+const currentStep = ref(0)
+const loading = ref(false)
 
 const steps = [
   { name: 'Cover', comp: StepCover },
@@ -15,20 +25,41 @@ const steps = [
   { name: 'KWH', comp: StepKwh },
   { name: 'Genset', comp: StepGenset },
   { name: 'AC', comp: StepAC },
-  { name: 'ACPDB', comp: StepAcpdb }, // Tambahkan step ACPDB di sini
+  { name: 'ACPDB', comp: StepAcpdb },
   { name: 'Power', comp: StepPowerDist },
   { name: 'Battery', comp: StepBattery },
   { name: 'Env', comp: StepEnvironment }
 ]
 
-// Pada method submitReport, tambahkan insert ke pm_acpdb:
-await Promise.all([
-  supabase.from('pm_grounding').insert([{ ...store.formData.grounding, report_id: reportId }]),
-  supabase.from('pm_kwh').insert([{ ...store.formData.kwh, report_id: reportId }]),
-  supabase.from('pm_genset').insert([{ ...store.formData.genset, report_id: reportId }]),
-  supabase.from('pm_ac').insert([{ units: store.formData.ac, report_id: reportId }]),
-  supabase.from('pm_acpdb').insert([{ ...store.formData.acpdb, report_id: reportId }]) // Insert ACPDB
-])
+const submitReport = async () => {
+  try {
+    loading.value = true
+
+    // 1. Simpan Cover ke pm_reports
+    const { data: repData, error: repErr } = await supabase
+      .from('pm_reports')
+      .insert([store.formData.cover])
+      .select()
+
+    if (repErr) throw repErr
+    const reportId = repData[0].id
+
+    // 2. Simpan Detail Modul secara Paralel
+    await Promise.all([
+      supabase.from('pm_grounding').insert([{ ...store.formData.grounding, report_id: reportId }]),
+      supabase.from('pm_kwh').insert([{ ...store.formData.kwh, report_id: reportId }]),
+      supabase.from('pm_genset').insert([{ ...store.formData.genset, report_id: reportId }]),
+      supabase.from('pm_ac').insert([{ units: store.formData.ac, report_id: reportId }]),
+      supabase.from('pm_acpdb').insert([{ ...store.formData.acpdb, report_id: reportId }])
+    ])
+
+    router.push('/report-detail')
+  } catch (err) {
+    alert('Gagal submit laporan: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
