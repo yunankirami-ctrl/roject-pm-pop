@@ -46,14 +46,15 @@ const submitReport = async () => {
     if (repErr) throw repErr
     const reportId = repData[0].id
 
-    // 2. Simpan Detail Modul secara Paralel
+    // 2. Simpan Detail Modul secara Paralel (Termasuk Inverter & Battery)
     await Promise.all([
       supabase.from('pm_grounding').insert([{ ...store.formData.grounding, report_id: reportId }]),
       supabase.from('pm_kwh').insert([{ ...store.formData.kwh, report_id: reportId }]),
       supabase.from('pm_genset').insert([{ ...store.formData.genset, report_id: reportId }]),
       supabase.from('pm_ac').insert([{ units: store.formData.ac, report_id: reportId }]),
       supabase.from('pm_acpdb').insert([{ ...store.formData.acpdb, report_id: reportId }]),
-      supabase.from('pm_inverter').insert([{ inverters: store.formData.inverters, comments: store.formData.inverter_comments, photos: store.formData.inverter_photos, report_id: reportId }])
+      supabase.from('pm_inverter').insert([{ inverters: store.formData.inverters, comments: store.formData.inverter_comments, photos: store.formData.inverter_photos, report_id: reportId }]),
+      supabase.from('pm_battery').insert([{ batteries: store.formData.batteries, comments: store.formData.battery_comments, photos: store.formData.battery_photos, report_id: reportId }])
     ])
 
     router.push('/report-detail')

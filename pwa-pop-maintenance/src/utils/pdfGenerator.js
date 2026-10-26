@@ -1080,5 +1080,123 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+// ================= PAGE BATTERY =================
+const batteryList = data?.batteries || []
+const batteryPhotos = data?.battery_photos || []
+const batteryComments = data?.battery_comments || ''
+
+const batteryImages = []
+if (batteryPhotos.length > 0) {
+  for (const url of batteryPhotos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      batteryImages.push({ image: b64, width: 180, alignment: 'center', margin: [0, 5, 0, 5] })
+    }
+  }
+}
+
+const batteryContentSections = []
+batteryList.forEach((rect) => {
+  const bankTables = (rect.banks || []).map((bank) => {
+    const cellRows = (bank.cells || []).map((cell) => [cell.cell_label, cell.tegangan || '-'])
+    return [
+      { text: bank.nama_bank || 'Bank#1', bold: true, alignment: 'center', fillColor: '#eaeaea' },
+      {
+        table: {
+          widths: ['35%', '65%'],
+          body: [
+            ['Merk', bank.merk || '-'],
+            ['Type', bank.type || '-'],
+            ['Kapasitas', bank.kapasitas || '-'],
+            ['SN', bank.sn || '-'],
+            ...cellRows
+          ]
+        },
+        layout: 'noBorders'
+      }
+    ]
+  })
+
+  batteryContentSections.push(
+    [
+      { text: rect.nama_recty || 'BATTERY RECTY 1', bold: true, alignment: 'center', colSpan: 2, fillColor: '#d0d0d0' },
+      {}
+    ],
+    [
+      'Description',
+      {
+        table: {
+          widths: bankTables.map(() => `${100 / bankTables.length}%`),
+          body: [bankTables.map(bt => bt[0])]
+        },
+        layout: 'noBorders'
+      }
+    ],
+    [
+      'Battery & Tegangan',
+      {
+        table: {
+          widths: bankTables.map(() => `${100 / bankTables.length}%`),
+          body: [bankTables.map(bt => bt[1])]
+        },
+        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#cccccc', vLineColor: () => '#cccccc' }
+      }
+    ]
+  )
+})
+
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'BATTERY SYSTEM',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1.5, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' }
+  },
+  {
+    table: {
+      widths: ['30%', '70%'],
+      body: batteryContentSections.length > 0 ? batteryContentSections : [['-', '-']]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          batteryImages.length > 0 ? { stack: batteryImages } : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [{ text: `Comments : ${batteryComments}`, bold: true, margin: [0, 5, 0, 20] }]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  }
+)
   return pdfMake.createPdf(docDefinition)
 }
