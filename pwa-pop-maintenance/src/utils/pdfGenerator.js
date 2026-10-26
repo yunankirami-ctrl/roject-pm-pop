@@ -3,11 +3,15 @@ import pdfFonts from 'pdfmake/build/vfs_fonts'
 
 pdfMake.vfs = pdfFonts && pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfMake.vfs || {}
 
-// Helper konversi logo ke Base64
+// Helper konversi logo / foto ke Base64 (dengan timeout aman)
 async function getBase64ImageFromUrl(imageUrl) {
   if (!imageUrl) return null
   try {
-    const res = await fetch(imageUrl)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 4000)
+    const res = await fetch(imageUrl, { signal: controller.signal, mode: 'cors' })
+    clearTimeout(timeoutId)
+    if (!res.ok) return null
     const blob = await res.blob()
     return new Promise((resolve) => {
       const reader = new FileReader()
@@ -22,14 +26,31 @@ async function getBase64ImageFromUrl(imageUrl) {
 
 export async function generatePMPdf(data) {
   const cover = data.cover || {}
+  const grounding = data.grounding || {}
 
-  // Load Logo dari public/logo-pln.png
+  // 1. Load Logo PLN Icon Plus
   const logoBase64 = await getBase64ImageFromUrl('/logo-pln.png')
 
-  // Simbol centang/box untuk Tipe POP
+  // 2. Simbol centang/box untuk Tipe POP
   const isSuperBackbone = cover.tipe_pop === 'Super Backbone' ? '☑ Super Backbone' : '☐ Super Backbone'
   const isBackbone = cover.tipe_pop === 'Backbone' ? '☑ Backbone' : '☐ Backbone'
   const isDistribusi = cover.tipe_pop === 'Distribusi' ? '☑ Distribusi' : '☐ Distribusi'
+
+  // 3. Process Foto Grounding
+  const groundingImages = []
+  if (grounding.photos && grounding.photos.length > 0) {
+    for (const url of grounding.photos) {
+      const b64 = await getBase64ImageFromUrl(url)
+      if (b64) {
+        groundingImages.push({
+          image: b64,
+          width: 200,
+          alignment: 'center',
+          margin: [0, 5, 0, 5]
+        })
+      }
+    }
+  }
 
   const docDefinition = {
     pageSize: 'A4',
@@ -119,14 +140,113 @@ export async function generatePMPdf(data) {
           hLineColor: () => '#000000',
           vLineColor: () => '#000000'
         },
-        margin: [0, -1, 0, 0] // Menempelkan dengan tabel header di atas
+        margin: [0, -1, 0, 0]
       },
 
-      { text: '', pageBreak: 'after' } // Pemisah ke Halaman 2 (Grounding)
+      // PEMISAH KE HALAMAN 2
+      { text: '', pageBreak: 'after' },
+
+      // ================= PAGE 2: GROUNDING SYSTEM (PERUBAHAN BARU) =================
+      // Header Grey Grounding
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: 'Grounding System',
+                style: 'sectionTitleHeader',
+                alignment: 'center',
+                fillColor: '#808080',
+                color: '#ffffff',
+                bold: true,
+                margin: [0, 4, 0, 4]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1.5,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        }
+      },
+      // Tabel Pengukuran Grounding
+      {
+        table: {
+          widths: ['50%', '50%'],
+          body: [
+            [
+              { text: 'Pengukuran On Bak Kontrol Outdoor', bold: true },
+              { text: `${grounding.pengukuran_outdoor || '...'} Ohm`, alignment: 'right', bold: true }
+            ],
+            [
+              { text: 'Pengukuran On Bak Kontrol Indoor', bold: true },
+              { text: `${grounding.pengukuran_indoor || '...'} Ohm`, alignment: 'right', bold: true }
+            ],
+            [
+              { text: 'System Grounding', bold: true },
+              { text: grounding.system_grounding || 'Single', alignment: 'center', bold: true }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      // Area Foto Dokumentasi Grounding
+      {
+        table: {
+          widths: ['20%', '80%'],
+          body: [
+            [
+              { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+              groundingImages.length > 0
+                ? { stack: groundingImages }
+                : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      },
+      // Area Komentar Grounding
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: `Comments : ${grounding.comments || ''}`,
+                bold: true,
+                margin: [0, 5, 0, 25]
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1.5,
+          hLineColor: () => '#000000',
+          vLineColor: () => '#000000'
+        },
+        margin: [0, -1, 0, 0]
+      }
     ],
     styles: {
       coverHeaderTitle: { fontSize: 14, bold: true, color: '#000000' },
-      brandFallback: { fontSize: 18, bold: true, color: '#00A2E9' }
+      brandFallback: { fontSize: 18, bold: true, color: '#00A2E9' },
+      sectionTitleHeader: { fontSize: 13, bold: true }
     }
   }
 

@@ -14,11 +14,12 @@ export const usePmStore = defineStore('pmReport', () => {
   tim_sti: ''
 },
     grounding: {
-      pengukuran_outdoor: '',
-      pengukuran_indoor: '',
-      system_grounding: 'Single',
-      photos: []
-    },
+  pengukuran_outdoor: '',
+  pengukuran_indoor: '',
+  system_grounding: 'Single',
+  comments: '',
+  photos: []
+},
     kwh: {
       id_customer: '',
       phasa: 3,
