@@ -55,7 +55,7 @@ const submitReport = async () => {
       supabase.from('pm_ac').insert([{ units: store.formData.ac, report_id: reportId }]),
       supabase.from('pm_acpdb').insert([{ ...store.formData.acpdb, report_id: reportId }]),
       supabase.from('pm_inverter').insert([{ inverters: store.formData.inverters, comments: store.formData.inverter_comments, photos: store.formData.inverter_photos, report_id: reportId }]),
-      supabase.from('pm_battery').insert([{ batteries: store.formData.batteries, comments: store.formData.battery_comments, photos: store.formData.battery_photos, report_id: reportId }])
+      supabase.from('pm_battery').insert([{ batteries: store.formData.batteries, comments: store.formData.battery_comments, photos: store.formData.battery_photos, report_id: reportId }]),
       supabase.from('pm_dcpdb').insert([{ ...store.formData.dcpdb, report_id: reportId }])
     ])
 
