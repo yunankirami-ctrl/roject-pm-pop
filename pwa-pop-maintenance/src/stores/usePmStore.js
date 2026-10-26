@@ -133,6 +133,33 @@ addPhoto(moduleName, url) {
     this.formData[moduleName].photos.push(url)
   }
 },
+// Di dalam state formData:
+inverters: [
+  {
+    nama_inverter: 'Inverter #1',
+    merk: '',
+    type: '',
+    sn: '',
+    up_link: '',
+    kapasitas: '',
+    outputs: [
+      { label: 'Output 1', merk: '', peruntukan: '' }
+    ]
+  }
+],
+inverter_comments: '',
+inverter_photos: [],
+
+// Di dalam fungsi addPhoto:
+addPhoto(moduleName, url) {
+  if (moduleName === 'rectifier') {
+    this.formData.rectifier_photos.push(url)
+  } else if (moduleName === 'inverter') {
+    this.formData.inverter_photos.push(url)
+  } else if (this.formData[moduleName]) {
+    this.formData[moduleName].photos.push(url)
+  }
+},
     battery: [
       { rectifier_target: 'BATTERY RECTY 1', bank_name: 'Bank#1', merk: 'NARADA', type: '48NPFC100XV', kapasitas: '100', sn: '', cell_voltages: { cell1: '48', cell2: '48', cell3: '48', cell4: '48' }, photos: [] }
     ],

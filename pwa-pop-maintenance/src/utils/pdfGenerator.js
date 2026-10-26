@@ -958,3 +958,127 @@ export async function generatePMPdf(data) {
 
   return pdfMake.createPdf(docDefinition)
 }
+// ================= PAGE INVERTER =================
+const inverterList = data?.inverters || []
+const inverterPhotos = data?.inverter_photos || []
+const inverterComments = data?.inverter_comments || ''
+
+const inverterImages = []
+if (inverterPhotos.length > 0) {
+  for (const url of inverterPhotos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      inverterImages.push({ image: b64, width: 180, alignment: 'center', margin: [0, 5, 0, 5] })
+    }
+  }
+}
+
+const inverterContentRows = []
+inverterList.forEach((inv) => {
+  const outputRows = (inv.outputs || []).map((out, i) => [
+    { text: out.label || `Output ${i+1}`, bold: true, alignment: 'center' },
+    {
+      table: {
+        widths: ['50%', '50%'],
+        body: [
+          ['Merk', out.merk || '-'],
+          ['Peruntukan', out.peruntukan || '-']
+        ]
+      },
+      layout: 'noBorders'
+    }
+  ])
+
+  inverterContentRows.push(
+    [
+      { text: 'Description', bold: true },
+      { text: inv.nama_inverter || 'Inverter #1', bold: true, alignment: 'center', fillColor: '#f2f2f2' }
+    ],
+    [
+      'Inverter',
+      {
+        table: {
+          widths: ['35%', '65%'],
+          body: [
+            ['Merk', inv.merk || '-'],
+            ['Type', inv.type || '-'],
+            ['SN', inv.sn || '-']
+          ]
+        },
+        layout: 'noBorders'
+      }
+    ],
+    ['Up Link Inverter', inv.up_link || '-'],
+    ['Kapasitas Inverter', inv.kapasitas || '-'],
+    [
+      'Output',
+      {
+        table: {
+          widths: ['25%', '75%'],
+          body: outputRows.length > 0 ? outputRows : [['-', '-']]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1,
+          hLineColor: () => '#cccccc',
+          vLineColor: () => '#cccccc'
+        }
+      }
+    ]
+  )
+})
+
+// Masukkan ke array content docDefinition:
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'INVERTER',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1.5, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' }
+  },
+  {
+    table: {
+      widths: ['30%', '70%'],
+      body: inverterContentRows.length > 0 ? inverterContentRows : [['-', '-']]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          inverterImages.length > 0 ? { stack: inverterImages } : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [{ text: `Comments : ${inverterComments}`, bold: true, margin: [0, 5, 0, 20] }]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  }
+)
