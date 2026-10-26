@@ -26,7 +26,7 @@ const steps = [
   { name: 'Genset', comp: StepGenset },
   { name: 'AC', comp: StepAC },
   { name: 'ACPDB', comp: StepAcpdb },
-  { name: 'Power', comp: StepPowerDist },
+  { name: 'Rectifier', comp: StepPowerDist },
   { name: 'Battery', comp: StepBattery },
   { name: 'Env', comp: StepEnvironment }
 ]

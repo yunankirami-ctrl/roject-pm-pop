@@ -795,3 +795,143 @@ export async function generatePMPdf(data) {
 
   return pdfMake.createPdf(docDefinition)
 }
+// ================= PAGE 6: RECTIFIER =================
+const rectList = data?.rectifiers || []
+const rectPhotos = data?.rectifier_photos || []
+const rectComments = data?.rectifier_comments || ''
+
+const rectImages = []
+if (rectPhotos.length > 0) {
+  for (const url of rectPhotos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      rectImages.push({ image: b64, width: 180, alignment: 'center', margin: [0, 5, 0, 5] })
+    }
+  }
+}
+
+const rectContentRows = []
+rectList.forEach((rect) => {
+  // Baris Tipe Modul dinamis
+  const modulTipeRows = rect.moduls.map((m, i) => [`Modul ${i + 1}`, `: ${m.tipe || '-'}`])
+  const modulKapRows = rect.moduls.map((m, i) => [`Modul ${i + 1}`, `${m.kapasitas || '-'}`])
+
+  // Baris Output MCB dinamis
+  const mcbRows = rect.mcbs.map((mcb, i) => [
+    { text: mcb.mcb_label || `MCB ${i+1}`, bold: true, alignment: 'center' },
+    {
+      table: {
+        widths: ['35%', '65%'],
+        body: [
+          ['Merk', mcb.merk || '-'],
+          ['Kapasitas', mcb.kapasitas || '-'],
+          ['Peruntukan', mcb.peruntukan || '-']
+        ]
+      },
+      layout: 'noBorders'
+    }
+  ])
+
+  rectContentRows.push(
+    [
+      { text: 'Description', bold: true },
+      { text: rect.nama_rectifier || 'Rectifier #1', bold: true, alignment: 'center', fillColor: '#f2f2f2' }
+    ],
+    [
+      'Rectifier',
+      {
+        table: {
+          widths: ['35%', '65%'],
+          body: [
+            ['Merk', rect.merk || '-'],
+            ['Type', rect.type || '-'],
+            ['SN', rect.sn || '-']
+          ]
+        },
+        layout: 'noBorders'
+      }
+    ],
+    ['Jumlah Modul', rect.jumlah_modul || rect.moduls.length],
+    [
+      'TIPE MODUL',
+      { table: { widths: ['35%', '65%'], body: modulTipeRows.length > 0 ? modulTipeRows : [['-', '-']] }, layout: 'noBorders' }
+    ],
+    [
+      'Kapasitas/module (Ampere)',
+      { table: { widths: ['35%', '65%'], body: modulKapRows.length > 0 ? modulKapRows : [['-', '-']] }, layout: 'noBorders' }
+    ],
+    [
+      'Output',
+      {
+        table: {
+          widths: ['25%', '75%'],
+          body: mcbRows.length > 0 ? mcbRows : [['-', '-']]
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1,
+          hLineColor: () => '#cccccc',
+          vLineColor: () => '#cccccc'
+        }
+      }
+    ]
+  )
+})
+
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+
+  // Header Rectifier
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'RECTIFIER',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1.5, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' }
+  },
+  {
+    table: {
+      widths: ['30%', '70%'],
+      body: rectContentRows.length > 0 ? rectContentRows : [['-', '-']]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  // Photos
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          rectImages.length > 0 ? { stack: rectImages } : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  // Comments
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [{ text: `Comments : ${rectComments}`, bold: true, margin: [0, 5, 0, 20] }]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  }
+)

@@ -107,6 +107,32 @@ addPhoto(moduleName, url) {
     this.formData[moduleName].photos.push(url)
   }
 },
+rectifiers: [
+  {
+    nama_rectifier: 'Rectifier #1',
+    merk: '',
+    type: '',
+    sn: '',
+    jumlah_modul: 3,
+    moduls: [
+      { tipe: 'RB2000', kapasitas: '40' },
+      { tipe: 'RB2000', kapasitas: '40' },
+      { tipe: 'RB2000', kapasitas: '40' }
+    ],
+    mcbs: [
+      { mcb_label: 'MCB 1', merk: 'NADER', kapasitas: '63', peruntukan: 'BATT1' }
+    ]
+  }
+],
+rectifier_comments: '',
+rectifier_photos: [],
+addPhoto(moduleName, url) {
+  if (moduleName === 'rectifier') {
+    this.formData.rectifier_photos.push(url)
+  } else if (this.formData[moduleName]) {
+    this.formData[moduleName].photos.push(url)
+  }
+},
     battery: [
       { rectifier_target: 'BATTERY RECTY 1', bank_name: 'Bank#1', merk: 'NARADA', type: '48NPFC100XV', kapasitas: '100', sn: '', cell_voltages: { cell1: '48', cell2: '48', cell3: '48', cell4: '48' }, photos: [] }
     ],
