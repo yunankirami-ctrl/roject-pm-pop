@@ -1377,6 +1377,7 @@ docDefinition.content.push(
   }
 )
 // ================= PAGE ENVIRONMENT =================
+// ================= PAGE ENVIRONMENT =================
 const env = data?.environment || {}
 const envAlarms = env.alarms || {}
 
@@ -1404,8 +1405,18 @@ const alarmTableRows = alarmKeys.map((item) => {
   const status = envAlarms[item.key] || 'OK'
   return [
     item.label,
-    { text: status === 'OK' ? '☑ OK' : '☐ OK', alignment: 'center' },
-    { text: status === 'NOT OK' ? '☑ NOT OK' : '☐ NOT OK', alignment: 'center' }
+    { 
+      text: status === 'OK' ? '[ V ] OK' : '[   ] OK', 
+      alignment: 'center', 
+      bold: status === 'OK',
+      color: status === 'OK' ? '#000000' : '#888888'
+    },
+    { 
+      text: status === 'NOT OK' ? '[ V ] NOT OK' : '[   ] NOT OK', 
+      alignment: 'center', 
+      bold: status === 'NOT OK',
+      color: status === 'NOT OK' ? '#ff0000' : '#888888'
+    }
   ]
 })
 
@@ -1445,7 +1456,11 @@ docDefinition.content.push(
     table: {
       widths: ['40%', '30%', '30%'],
       body: [
-        [{ text: 'External Alarm', bold: true }, { text: '', bold: true }, { text: '', bold: true }],
+        [
+          { text: 'External Alarm', bold: true }, 
+          { text: 'Status', bold: true, alignment: 'center' }, 
+          { text: 'Status', bold: true, alignment: 'center' }
+        ],
         ...alarmTableRows
       ]
     },
