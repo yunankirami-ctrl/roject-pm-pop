@@ -32,8 +32,8 @@ const steps = [
 const submitReport = async () => {
   try {
     loading.value = true
-    
-    // 1. Simpan ke Supabase pm_reports
+
+    // 1. Simpan Cover ke pm_reports
     const { data: repData, error: repErr } = await supabase
       .from('pm_reports')
       .insert([store.formData.cover])
@@ -42,10 +42,15 @@ const submitReport = async () => {
     if (repErr) throw repErr
     const reportId = repData[0].id
 
-    // 2. Simpan Detail Grounding
-    await supabase.from('pm_grounding').insert([{ ...store.formData.grounding, report_id: reportId }])
+    // 2. Simpan Detail Modul secara Paralel
+    await Promise.all([
+      supabase.from('pm_grounding').insert([{ ...store.formData.grounding, report_id: reportId }]),
+      supabase.from('pm_kwh').insert([{ ...store.formData.kwh, report_id: reportId }]),
+      supabase.from('pm_genset').insert([{ ...store.formData.genset, report_id: reportId }]),
+      supabase.from('pm_ac').insert([{ units: store.formData.ac, report_id: reportId }])
+    ])
 
-    // Redirect ke preview
+    // 3. Pindah ke Halaman Ringkasan/Download
     router.push('/report-detail')
   } catch (err) {
     alert('Gagal submit laporan: ' + err.message)
@@ -57,54 +62,62 @@ const submitReport = async () => {
 
 <template>
   <div class="max-w-md mx-auto min-h-screen bg-white shadow-md flex flex-col">
-    <!-- Header dengan Logo PLN Icon Plus -->
+    <!-- Header Utama PWA -->
     <header class="bg-sky-600 text-white p-3 shadow flex items-center justify-center gap-3">
-      <!-- Simpan file logo di public/logo-pln.png atau panggil via aset -->
-      <img src="/logo-pln.png" alt="Logo PLN Icon Plus" class="h-9 bg-white p-1 rounded" />
+      <img src="/logo-pln.png" alt="Logo PLN Icon Plus" class="h-9 bg-white p-1 rounded object-contain" />
       <span class="font-bold text-xs sm:text-sm tracking-wide">
         PWA PREVENTIVE MAINTENANCE POP
       </span>
     </header>
 
-    <!-- Stepper Navigation -->
-    <div class="flex overflow-x-auto bg-slate-100 p-2 border-b text-xs space-x-1">
-      <!-- ... tombol stepper ... -->
+    <!-- Navigation Stepper Tabs -->
+    <div class="flex overflow-x-auto bg-slate-100 p-2 border-b text-xs space-x-1 scrollbar-none">
+      <button
+        v-for="(step, index) in steps"
+        :key="index"
+        @click="currentStep = index"
+        :class="[
+          'px-3 py-1.5 rounded-full whitespace-nowrap font-medium transition',
+          currentStep === index 
+            ? 'bg-sky-600 text-white shadow-sm' 
+            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+        ]"
+      >
+        {{ step.name }}
+      </button>
     </div>
 
-    <!-- ... rest of view ... -->
-  </div>
-</template>
-
-    <!-- Step Component Content -->
+    <!-- Area Komponen Form per Step -->
     <main class="p-4 flex-1">
       <component :is="steps[currentStep].comp" />
     </main>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Action Bar -->
     <footer class="p-4 border-t flex justify-between bg-slate-50">
-      <button 
-        @click="currentStep--" 
-        :disabled="currentStep === 0" 
-        class="px-4 py-2 text-xs bg-slate-200 rounded disabled:opacity-50"
+      <button
+        @click="currentStep--"
+        :disabled="currentStep === 0"
+        class="px-4 py-2 text-xs font-semibold bg-slate-200 text-slate-700 rounded-lg disabled:opacity-50 transition"
       >
         Kembali
       </button>
 
-      <button 
-        v-if="currentStep < steps.length - 1" 
-        @click="currentStep++" 
-        class="px-4 py-2 text-xs bg-sky-600 text-white font-bold rounded"
+      <button
+        v-if="currentStep < steps.length - 1"
+        @click="currentStep++"
+        class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition"
       >
         Lanjut
       </button>
 
-      <button 
-        v-else 
-        @click="submitReport" 
+      <button
+        v-else
+        @click="submitReport"
         :disabled="loading"
-        class="px-4 py-2 text-xs bg-emerald-600 text-white font-bold rounded"
+        class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition disabled:opacity-50 flex items-center gap-1"
       >
-        {{ loading ? 'Menyimpan...' : 'Submit Laporan' }}
+        <span v-if="loading" class="animate-spin">🌀</span>
+        <span>{{ loading ? 'Menyimpan...' : 'Submit Laporan' }}</span>
       </button>
     </footer>
   </div>
