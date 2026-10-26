@@ -1376,5 +1376,105 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+// ================= PAGE ENVIRONMENT =================
+const env = data?.environment || {}
+const envAlarms = env.alarms || {}
+
+const envImages = []
+if (env.photos && env.photos.length > 0) {
+  for (const url of env.photos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      envImages.push({ image: b64, width: 180, alignment: 'center', margin: [0, 5, 0, 5] })
+    }
+  }
+}
+
+const alarmKeys = [
+  { key: 'door_open', label: 'Door Open' },
+  { key: 'pln_off', label: 'PLN Off' },
+  { key: 'high_temp', label: 'High Temp' },
+  { key: 'genset_run_fail', label: 'Genset Run / Fail' },
+  { key: 'modul_rectifier', label: 'Modul Rectifier' },
+  { key: 'smoke_fire', label: 'Smoke & Fire' },
+  { key: 'battery', label: 'Battery' }
+]
+
+const alarmTableRows = alarmKeys.map((item) => {
+  const status = envAlarms[item.key] || 'OK'
+  return [
+    item.label,
+    { text: status === 'OK' ? '☑ OK' : '☐ OK', alignment: 'center' },
+    { text: status === 'NOT OK' ? '☑ NOT OK' : '☐ NOT OK', alignment: 'center' }
+  ]
+})
+
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'Form Pengecekan Ruangan / Environment',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1.5, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' }
+  },
+  {
+    table: {
+      widths: ['30%', '70%'],
+      body: [
+        ['Suhu', `${env.suhu || '-'} °C`],
+        ['Pembersihan AC terakhir', env.pembersihan_ac || '-']
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['40%', '30%', '30%'],
+      body: [
+        [{ text: 'External Alarm', bold: true }, { text: '', bold: true }, { text: '', bold: true }],
+        ...alarmTableRows
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          envImages.length > 0 ? { stack: envImages } : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [{ text: `Comments : ${env.comments || ''}`, bold: true, margin: [0, 5, 0, 20] }]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  }
+)
   return pdfMake.createPdf(docDefinition)
 }

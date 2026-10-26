@@ -160,6 +160,21 @@ distribusi_rak: {
   comments: '',
   photos: []
 },
+environment: {
+  suhu: '',
+  pembersihan_ac: '',
+  alarms: {
+    door_open: 'OK',
+    pln_off: 'OK',
+    high_temp: 'OK',
+    genset_run_fail: 'OK',
+    modul_rectifier: 'OK',
+    smoke_fire: 'OK',
+    battery: 'OK'
+  },
+  comments: '',
+  photos: []
+},
   })
   
 
