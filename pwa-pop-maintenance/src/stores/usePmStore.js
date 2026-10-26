@@ -4,14 +4,15 @@ import { ref } from 'vue'
 export const usePmStore = defineStore('pmReport', () => {
   const formData = ref({
     cover: {
-      id_mr: '',
-      tanggal_pelaksanaan: new Date().toISOString().split('T')[0],
-      nama_pop: '',
-      alamat_pop: '',
-      koordinat_pop: '',
-      tipe_pop: 'Super Backbone',
-      tim_lapangan: ''
-    },
+  id_mr: '',
+  tanggal_pelaksanaan: new Date().toISOString().split('T')[0],
+  nama_pop: '',
+  alamat_pop: '',
+  koordinat_pop: '',
+  tipe_pop: 'Backbone',
+  tim_icon: '',
+  tim_sti: ''
+},
     grounding: {
       pengukuran_outdoor: '',
       pengukuran_indoor: '',
