@@ -1,4 +1,3 @@
-JavaScript
 import pdfMake from 'pdfmake/build/pdfmake'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
 
@@ -145,7 +144,6 @@ export async function generatePMPdf(data) {
     ])
   })
 
-  // DEKLARASI DOKUMEN PDF (1-PAGE PER SECTION)
   const docDefinition = {
     pageSize: 'A4',
     pageMargins: [30, 30, 30, 30],
@@ -795,6 +793,5 @@ export async function generatePMPdf(data) {
     }
   }
 
-  // Mengembalikan instance pdfMake untuk Halaman 1 s/d 6
   return pdfMake.createPdf(docDefinition)
 }
