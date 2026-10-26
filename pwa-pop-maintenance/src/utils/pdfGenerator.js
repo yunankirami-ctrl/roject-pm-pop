@@ -956,8 +956,6 @@ export async function generatePMPdf(data) {
     }
   }
 
-  return pdfMake.createPdf(docDefinition)
-}
 // ================= PAGE INVERTER =================
 const inverterList = data?.inverters || []
 const inverterPhotos = data?.inverter_photos || []
@@ -1082,3 +1080,5 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+  return pdfMake.createPdf(docDefinition)
+}
