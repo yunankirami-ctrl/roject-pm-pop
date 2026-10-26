@@ -88,6 +88,25 @@ addPhoto(moduleName, url) {
     this.formData[moduleName].photos.push(url)
   }
 },
+// Di dalam state store:
+acpdb: {
+  mcbs: [
+    { mcb_label: 'MCB 1', phasa: 'R', merk: 'SCHNEIDER', kapasitas: '25', a_terukur: '', peruntukan: 'SPARE' }
+  ],
+  arester_tipe: '',
+  arester_warna: 'Hijau',
+  comments: '',
+  photos: []
+},
+
+// Pada mutasi addPhoto:
+addPhoto(moduleName, url) {
+  if (moduleName === 'ac') {
+    this.formData.ac_photos.push(url)
+  } else if (this.formData[moduleName]) {
+    this.formData[moduleName].photos.push(url)
+  }
+}
     battery: [
       { rectifier_target: 'BATTERY RECTY 1', bank_name: 'Bank#1', merk: 'NARADA', type: '48NPFC100XV', kapasitas: '100', sn: '', cell_voltages: { cell1: '48', cell2: '48', cell3: '48', cell4: '48' }, photos: [] }
     ],

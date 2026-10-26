@@ -721,3 +721,157 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+// Tambahkan di dalam fungsi generatePMPdf(data) setelah Halaman 5:
+const acpdb = data.acpdb || {}
+const acpdbMcbs = acpdb.mcbs || []
+
+// Process Foto ACPDB
+const acpdbImages = []
+if (acpdb.photos && acpdb.photos.length > 0) {
+  for (const url of acpdb.photos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      acpdbImages.push({
+        image: b64,
+        width: 180,
+        alignment: 'center',
+        margin: [0, 5, 0, 5]
+      })
+    }
+  }
+}
+
+// Susun Baris Tabel MCB ACPDB
+const acpdbRows = [
+  [
+    { text: '', bold: true, alignment: 'center' },
+    { text: 'Phasa', bold: true, alignment: 'center' },
+    { text: 'Merk', bold: true, alignment: 'center' },
+    { text: 'Kapasitas', bold: true, alignment: 'center' },
+    { text: 'A terukur', bold: true, alignment: 'center' },
+    { text: 'Peruntukan', bold: true, alignment: 'center' }
+  ]
+]
+
+acpdbMcbs.forEach((row) => {
+  acpdbRows.push([
+    { text: row.mcb_label || 'MCB', bold: true, alignment: 'center' },
+    { text: row.phasa || '-', alignment: 'center' },
+    { text: row.merk || '-', alignment: 'center' },
+    { text: row.kapasitas || '-', alignment: 'center' },
+    { text: row.a_terukur || '-', alignment: 'center' },
+    { text: row.peruntukan || '-', alignment: 'center' }
+  ])
+})
+
+// Push Halaman 6 ke content docDefinition
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+
+  // ================= PAGE 6: ACPDB =================
+  // Header Grey
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'ACPDB',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1.5,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    }
+  },
+
+  // Tabel Daftar MCB
+  {
+    table: {
+      widths: ['15%', '10%', '25%', '15%', '15%', '20%'],
+      body: acpdbRows
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Arester
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Arester', bold: true },
+          `Tipe : ${acpdb.arester_tipe || '-'}\nWarna indikator : ${acpdb.arester_warna || '-'}`
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Area Photos
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          acpdbImages.length > 0
+            ? { stack: acpdbImages }
+            : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Area Comments
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: `Comments : ${acpdb.comments || ''}`,
+            bold: true,
+            margin: [0, 5, 0, 20]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  }
+)
