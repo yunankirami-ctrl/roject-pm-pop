@@ -252,3 +252,168 @@ export async function generatePMPdf(data) {
 
   return pdfMake.createPdf(docDefinition)
 }
+// Tambahkan di dalam fungsi generatePMPdf(data) setelah Halaman 2:
+const kwh = data.kwh || {}
+
+// Process Foto KWH
+const kwhImages = []
+if (kwh.photos && kwh.photos.length > 0) {
+  for (const url of kwh.photos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      kwhImages.push({
+        image: b64,
+        width: 180,
+        alignment: 'center',
+        margin: [0, 5, 0, 5]
+      })
+    }
+  }
+}
+
+// Tambahkan ke content docDefinition:
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+
+  // ================= PAGE 3: MAIN AC POWER (PANEL KWH METER) =================
+  // Header Grey
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'Main AC Power Information (Panel KWH Meter)',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1.5,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    }
+  },
+  // Tabel KWH Detail
+  {
+    table: {
+      widths: ['35%', '65%'],
+      body: [
+        ['Id Customer / Id Meter', kwh.id_customer || ''],
+        ['Phasa', kwh.phasa || '3'],
+        ['Daya (KVA)', kwh.daya_kva || ''],
+        [
+          'Kapasitas MCB',
+          `R (ampere) : ${kwh.mcb_r_ampere || ''}\nS (ampere) : ${kwh.mcb_s_ampere || ''}\nT (ampere) : ${kwh.mcb_t_ampere || ''}`
+        ],
+        [
+          'Pengukuran Phasa',
+          {
+            table: {
+              widths: ['50%', '50%'],
+              body: [
+                [
+                  `R - N voltage : ${kwh.voltage_rn || ''}\nS - N voltage : ${kwh.voltage_sn || ''}\nT - N voltage : ${kwh.voltage_tn || ''}\nN - G voltage : ${kwh.voltage_ng || ''}`,
+                  `R Ampere : ${kwh.ampere_r || ''}\nS Ampere : ${kwh.ampere_s || ''}\nT Ampere : ${kwh.ampere_t || ''}`
+                ]
+              ]
+            },
+            layout: 'noBorders'
+          }
+        ],
+        [
+          'COS',
+          {
+            table: {
+              widths: ['50%', '50%'],
+              body: [[kwh.cos_phi_status || 'Ada', `Tipe : ${kwh.cos_phi_tipe || ''}`]]
+            },
+            layout: 'noBorders'
+          }
+        ],
+        [
+          'Arester',
+          {
+            table: {
+              widths: ['50%', '50%'],
+              body: [[kwh.arester_status || 'Ada', `Tipe : ${kwh.arester_tipe || ''}`]]
+            },
+            layout: 'noBorders'
+          }
+        ],
+        [
+          'Kabel output KWH',
+          {
+            table: {
+              widths: ['50%', '50%'],
+              body: [
+                [
+                  `Warna :\nR : ${kwh.kabel_r_warna || 'Merah'}\nS : ${kwh.kabel_s_warna || 'Kuning'}\nT : ${kwh.kabel_t_warna || 'Hitam'}\nN : ${kwh.kabel_n_warna || 'Hijau'}\nG : ${kwh.kabel_g_warna || 'Kuning Hijau'}`,
+                  `Luas Penampang Kabel :\nR (mm) : ${kwh.kabel_r_mm || ''}\nS (mm) : ${kwh.kabel_s_mm || ''}\nT (mm) : ${kwh.kabel_t_mm || ''}\nN (mm) : ${kwh.kabel_n_mm || ''}\nG (mm) : ${kwh.kabel_g_mm || ''}`
+                ]
+              ]
+            },
+            layout: 'noBorders'
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+  // Area Photos
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          kwhImages.length > 0
+            ? { stack: kwhImages }
+            : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+  // Area Comments
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: `Comments : ${kwh.comments || ''}`,
+            bold: true,
+            margin: [0, 5, 0, 20]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  }
+)
