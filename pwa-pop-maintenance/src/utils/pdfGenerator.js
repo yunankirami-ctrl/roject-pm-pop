@@ -417,3 +417,168 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+// Tambahkan di dalam fungsi generatePMPdf(data) setelah Halaman 3:
+const genset = data.genset || {}
+
+// Process Foto Genset
+const gensetImages = []
+if (genset.photos && genset.photos.length > 0) {
+  for (const url of genset.photos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      gensetImages.push({
+        image: b64,
+        width: 180,
+        alignment: 'center',
+        margin: [0, 5, 0, 5]
+      })
+    }
+  }
+}
+
+// Checkbox simbol helper
+const isAuto = genset.switch_mode === 'Automatic' ? '☑ Automatic   ☐ Manual' : '☐ Automatic   ☑ Manual'
+
+// Push Halaman 4 ke content docDefinition
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+
+  // ================= PAGE 4: MAIN AC POWER (GENSET) =================
+  // Header Grey
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'Main AC Power Information (Genset)',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1.5,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    }
+  },
+  
+  // Tabel Tiga Kolom (No - Section - Details)
+  {
+    table: {
+      widths: ['5%', '20%', '75%'],
+      body: [
+        // SECTION 1: GENERAL
+        [
+          { text: '1', alignment: 'center', bold: true, margin: [0, 25, 0, 0] },
+          { text: 'General', alignment: 'center', bold: true, margin: [0, 25, 0, 0] },
+          {
+            table: {
+              widths: ['30%', '70%'],
+              body: [
+                ['Merk', genset.merk || '-'],
+                ['Kapasitas', `${genset.kapasitas_kva || '-'} KVA`],
+                ['SN', genset.sn || '-'],
+                ['Fuel Level', `${genset.fuel_level_liter || '-'} liter`],
+                ['Hour Meter', `${genset.hour_meter || '-'} hour`],
+                ['Engine', genset.engine_status || '-'],
+                ['Accu', genset.accu_status || '-'],
+                ['Switch', isAuto],
+                ['Temperatur', `${genset.temperatur || '-'} °C`]
+              ]
+            },
+            layout: 'noBorders'
+          }
+        ],
+        // SECTION 2: PENGUKURAN
+        [
+          { text: '2', alignment: 'center', bold: true, margin: [0, 20, 0, 0] },
+          { text: 'Pengukuran', alignment: 'center', bold: true, margin: [0, 20, 0, 0] },
+          {
+            table: {
+              widths: ['30%', '70%'],
+              body: [
+                [{ text: 'Beban', bold: true }, `Voltage: ${genset.beban_voltage || '-'} V\nAmpere: ${genset.beban_ampere || '-'} A`],
+                [{ text: 'Tanpa Beban', bold: true }, `Voltage: ${genset.tanpa_beban_voltage || '-'} V\nAmpere: ${genset.tanpa_beban_ampere || '-'} A`]
+              ]
+            },
+            layout: 'noBorders'
+          }
+        ],
+        // SECTION 3: TERM
+        [
+          { text: '3', alignment: 'center', bold: true, margin: [0, 10, 0, 0] },
+          { text: 'Term', alignment: 'center', bold: true, margin: [0, 10, 0, 0] },
+          {
+            table: {
+              widths: ['100%'],
+              body: [
+                [`Kondisi Ruangan Genset:\n• Kebersihan: ${genset.kebersihan || 'Bersih'}\n• Temperatur/Suhu: ${genset.suhu_ruangan || 'Normal'}`]
+              ]
+            },
+            layout: 'noBorders'
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Area Photos
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          gensetImages.length > 0
+            ? { stack: gensetImages }
+            : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Area Comments
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: `Comments : ${genset.comments || 'TIDAK ADA GENSET'}`,
+            bold: true,
+            margin: [0, 5, 0, 20]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  }
+)

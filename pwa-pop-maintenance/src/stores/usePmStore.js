@@ -47,19 +47,24 @@ export const usePmStore = defineStore('pmReport', () => {
   photos: []
 },
     genset: {
-      merk: '',
-      kapasitas_kva: '',
-      sn: '',
-      fuel_level_liter: '',
-      hour_meter: '',
-      engine_status: 'OK',
-      accu_status: 'OK',
-      switch_mode: 'Automatic',
-      temperatur: '',
-      voltage_beban: '',
-      ampere_beban: '',
-      photos: []
-    },
+  merk: '',
+  kapasitas_kva: '',
+  sn: '',
+  fuel_level_liter: '',
+  hour_meter: '',
+  engine_status: 'OK',
+  accu_status: 'OK',
+  switch_mode: 'Automatic',
+  temperatur: '',
+  beban_voltage: '220',
+  beban_ampere: '',
+  tanpa_beban_voltage: '220',
+  tanpa_beban_ampere: '0',
+  kebersihan: 'Bersih',
+  suhu_ruangan: 'Normal',
+  comments: '',
+  photos: []
+},
     ac: [
       { kode_ac: 'AC-1', merk: '', pk: '', sn: '', kapasitas_mcb: '', beban: '', tahun_instalasi: '', photos: [] },
       { kode_ac: 'AC-2', merk: '', pk: '', sn: '', kapasitas_mcb: '', beban: '', tahun_instalasi: '', photos: [] }
