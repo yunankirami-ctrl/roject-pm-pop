@@ -6,9 +6,14 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     vue(),
-    tailwindcss(), // <-- Tambahkan ini
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // --- TAMBAHKAN BLOK INI ---
+      workbox: {
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // Menaikkan limit ke 4 MB
+      },
+      // --------------------------
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'PWA Maintenance POP Shelter',
