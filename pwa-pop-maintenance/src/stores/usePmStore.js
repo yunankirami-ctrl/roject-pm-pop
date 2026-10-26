@@ -145,8 +145,16 @@ export const usePmStore = defineStore('pmReport', () => {
       }
     ],
     battery_comments: '',
-    battery_photos: []
+    battery_photos: [],
+    dcpdb: {
+  mcbs: [
+    { mcb_label: 'MCB 1', phasa: '', merk: '', kapasitas: '', a_terukur: '', peruntukan: '' }
+  ],
+  comments: '',
+  photos: []
+},
   })
+  
 
   // Action tunggal penambahan foto dokumentasi
   const addPhoto = (moduleName, url) => {
@@ -158,6 +166,8 @@ export const usePmStore = defineStore('pmReport', () => {
       formData.value.inverter_photos.push(url)
     } else if (moduleName === 'battery') {
       formData.value.battery_photos.push(url)
+      } else if (moduleName === 'dcpdb') {
+    formData.value.dcpdb.photos.push(url)
     } else if (formData.value[moduleName] && Array.isArray(formData.value[moduleName].photos)) {
       formData.value[moduleName].photos.push(url)
     }

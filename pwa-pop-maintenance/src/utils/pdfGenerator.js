@@ -1198,5 +1198,94 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+// ================= PAGE DCPDB (DISTRIBUSI DC) =================
+const dcpdb = data?.dcpdb || {}
+const dcpdbMcbs = dcpdb.mcbs || []
+
+const dcpdbImages = []
+if (dcpdb.photos && dcpdb.photos.length > 0) {
+  for (const url of dcpdb.photos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      dcpdbImages.push({ image: b64, width: 180, alignment: 'center', margin: [0, 5, 0, 5] })
+    }
+  }
+}
+
+const dcpdbRows = [
+  [
+    { text: '', bold: true, alignment: 'center' },
+    { text: 'Phasa', bold: true, alignment: 'center' },
+    { text: 'Merk', bold: true, alignment: 'center' },
+    { text: 'Kapasitas', bold: true, alignment: 'center' },
+    { text: 'A terukur', bold: true, alignment: 'center' },
+    { text: 'Peruntukan', bold: true, alignment: 'center' }
+  ]
+]
+
+dcpdbMcbs.forEach((row) => {
+  dcpdbRows.push([
+    { text: row.mcb_label || 'MCB', bold: true, alignment: 'center' },
+    { text: row.phasa || '-', alignment: 'center' },
+    { text: row.merk || '-', alignment: 'center' },
+    { text: row.kapasitas || '-', alignment: 'center' },
+    { text: row.a_terukur || '-', alignment: 'center' },
+    { text: row.peruntukan || '-', alignment: 'center' }
+  ])
+})
+
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'DISTRIBUSI DC (DCPDB)',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1.5, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' }
+  },
+  {
+    table: {
+      widths: ['15%', '10%', '25%', '15%', '15%', '20%'],
+      body: dcpdbRows
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          dcpdbImages.length > 0 ? { stack: dcpdbImages } : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  },
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [{ text: `Comments : ${dcpdb.comments || ''}`, bold: true, margin: [0, 5, 0, 20] }]
+      ]
+    },
+    layout: { hLineWidth: () => 1, vLineWidth: () => 1.5, hLineColor: () => '#000000', vLineColor: () => '#000000' },
+    margin: [0, -1, 0, 0]
+  }
+)
   return pdfMake.createPdf(docDefinition)
 }
