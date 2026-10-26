@@ -57,23 +57,23 @@ const submitReport = async () => {
 
 <template>
   <div class="max-w-md mx-auto min-h-screen bg-white shadow-md flex flex-col">
-    <!-- Header -->
-    <header class="bg-sky-600 text-white p-4 font-bold text-center text-sm shadow">
-      PWA PREVENTIVE MAINTENANCE POP
+    <!-- Header dengan Logo PLN Icon Plus -->
+    <header class="bg-sky-600 text-white p-3 shadow flex items-center justify-center gap-3">
+      <!-- Simpan file logo di public/logo-pln.png atau panggil via aset -->
+      <img src="/logo-pln.png" alt="Logo PLN Icon Plus" class="h-9 bg-white p-1 rounded" />
+      <span class="font-bold text-xs sm:text-sm tracking-wide">
+        PWA PREVENTIVE MAINTENANCE POP
+      </span>
     </header>
 
     <!-- Stepper Navigation -->
     <div class="flex overflow-x-auto bg-slate-100 p-2 border-b text-xs space-x-1">
-      <button 
-        v-for="(st, idx) in steps" 
-        :key="idx" 
-        @click="currentStep = idx"
-        :class="[currentStep === idx ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600']"
-        class="px-3 py-1.5 rounded-full shrink-0 border"
-      >
-        {{ st.name }}
-      </button>
+      <!-- ... tombol stepper ... -->
     </div>
+
+    <!-- ... rest of view ... -->
+  </div>
+</template>
 
     <!-- Step Component Content -->
     <main class="p-4 flex-1">

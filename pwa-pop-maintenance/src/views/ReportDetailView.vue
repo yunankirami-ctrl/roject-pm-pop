@@ -12,9 +12,13 @@ const downloadPDF = async () => {
   try {
     loading.value = true
     const pdfDoc = await generatePMPdf(store.formData)
-    pdfDoc.download(`PM_${store.formData.cover?.nama_pop || 'SHELTER'}.pdf`)
+    const filename = `PM_${store.formData.cover?.nama_pop || 'SHELTER'}.pdf`
+    
+    // Panggil download dari pdfMake
+    pdfDoc.download(filename)
   } catch (err) {
-    alert('Gagal mengunduh PDF: ' + err.message)
+    console.error('Error generator PDF:', err)
+    alert('Gagal membuat PDF: ' + err.message)
   } finally {
     loading.value = false
   }
@@ -29,12 +33,12 @@ const sendToWhatsApp = async () => {
                  `*POP:* ${store.formData.cover?.nama_pop || '-'}\n` +
                  `*Tanggal:* ${store.formData.cover?.tanggal_pelaksanaan || '-'}\n` +
                  `*Teknisi ICON:* ${store.formData.cover?.tim_icon || store.formData.cover?.tim_lapangan || '-'}\n\n` +
-                 `_File PDF laporan sudah diunduh ke HP. Silakan lampirkan berkas PDF di pesan ini._`
+                 `_File PDF laporan sudah diunduh ke HP/Komputer. Silakan lampirkan berkas PDF di pesan ini._`
 
     const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
     window.open(waUrl, '_blank')
   } catch (err) {
-    alert('Gagal memproses ke WhatsApp: ' + err.message)
+    alert('Gagal membuka WhatsApp: ' + err.message)
   } finally {
     loading.value = false
   }
@@ -54,11 +58,11 @@ const backToForm = () => {
       </div>
       <h2 class="font-bold text-lg text-slate-800">Laporan Berhasil Disimpan!</h2>
       <p class="text-xs text-slate-500 leading-relaxed">
-        Data Preventive Maintenance POP {{ store.formData.cover?.nama_pop }} telah tersimpan di Supabase. Anda dapat mengunduh laporan PDF atau mengirimkannya via WhatsApp.
+        Data Preventive Maintenance POP {{ store.formData.cover?.nama_pop }} telah tersimpan. Silakan unduh PDF atau bagikan laporan.
       </p>
     </div>
 
-    <!-- Group Tombol Aksi -->
+    <!-- Tombol Aksi -->
     <div class="space-y-3">
       <button 
         @click="downloadPDF" 
@@ -66,7 +70,7 @@ const backToForm = () => {
         class="w-full py-3 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
       >
         <span v-if="loading" class="animate-spin">🌀</span>
-        <span>{{ loading ? 'Memproses PDF...' : 'Unduh File PDF Laporan' }}</span>
+        <span>{{ loading ? 'Mengunduh File PDF...' : 'Unduh File PDF Laporan' }}</span>
       </button>
 
       <button 
