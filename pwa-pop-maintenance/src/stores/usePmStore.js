@@ -106,7 +106,7 @@ addPhoto(moduleName, url) {
   } else if (this.formData[moduleName]) {
     this.formData[moduleName].photos.push(url)
   }
-}
+},
     battery: [
       { rectifier_target: 'BATTERY RECTY 1', bank_name: 'Bank#1', merk: 'NARADA', type: '48NPFC100XV', kapasitas: '100', sn: '', cell_voltages: { cell1: '48', cell2: '48', cell3: '48', cell4: '48' }, photos: [] }
     ],
