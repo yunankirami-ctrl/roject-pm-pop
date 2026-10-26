@@ -13,6 +13,7 @@ import StepAcpdb from '../components/StepAcpdb.vue'
 import StepPowerDist from '../components/StepPowerDist.vue'
 import StepInverter from '../components/StepInverter.vue'
 import StepBattery from '../components/StepBattery.vue'
+import StepDcpdb from '../components/StepDcpdb.vue'
 import StepEnvironment from '../components/StepEnvironment.vue'
 
 const store = usePmStore()
