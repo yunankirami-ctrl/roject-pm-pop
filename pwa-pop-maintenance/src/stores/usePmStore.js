@@ -65,17 +65,29 @@ export const usePmStore = defineStore('pmReport', () => {
   comments: '',
   photos: []
 },
-    ac: [
-      { kode_ac: 'AC-1', merk: '', pk: '', sn: '', kapasitas_mcb: '', beban: '', tahun_instalasi: '', photos: [] },
-      { kode_ac: 'AC-2', merk: '', pk: '', sn: '', kapasitas_mcb: '', beban: '', tahun_instalasi: '', photos: [] }
-    ],
-    powerDist: {
-      acpdb: [{ mcb_label: 'MCB 1', phasa: 'R', merk: 'SCHNEIDER', kapasitas: '80', a_terukur: '', peruntukan: 'MAIN' }],
-      dcpdb: [{ mcb_label: 'MCB 1', phasa: 'RI', merk: 'SCHNEIDER', kapasitas: '100', a_terukur: '', peruntukan: 'MAIN' }],
-      distribusi_rak: [{ mcb_label: 'MCB 1', rak_no: '2', merk: 'SCHNEIDER', kapasitas: '63', a_terukur: '', peruntukan: 'MAIN' }],
-      rectifiers: [{ rectifier_name: 'Rectifier#1', merk: 'ELTEK', type: 'SMARTPACKS', sn: '', jumlah_modul: 9, photos: [] }],
-      inverters: [{ inverter_name: 'Inverter#1', merk: '', type: '', sn: '', uplink_inverter: 'RECTI1', kapasitas_inverter: '', photos: [] }]
-    },
+    // Di dalam state store:
+ac: [
+  {
+    kode_ac: 'AC-1',
+    merk: '',
+    pk: '',
+    sn: '',
+    mcb: '',
+    beban: '',
+    tahun_instalasi: ''
+  }
+],
+ac_comments: '',
+ac_photos: [],
+
+// Helper penambahan foto khusus AC pada mutasi store:
+addPhoto(moduleName, url) {
+  if (moduleName === 'ac') {
+    this.formData.ac_photos.push(url)
+  } else if (this.formData[moduleName]) {
+    this.formData[moduleName].photos.push(url)
+  }
+},
     battery: [
       { rectifier_target: 'BATTERY RECTY 1', bank_name: 'Bank#1', merk: 'NARADA', type: '48NPFC100XV', kapasitas: '100', sn: '', cell_voltages: { cell1: '48', cell2: '48', cell3: '48', cell4: '48' }, photos: [] }
     ],

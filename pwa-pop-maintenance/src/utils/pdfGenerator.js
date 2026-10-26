@@ -582,3 +582,142 @@ docDefinition.content.push(
     margin: [0, -1, 0, 0]
   }
 )
+// Tambahkan di dalam fungsi generatePMPdf(data) setelah Halaman 4:
+const acList = data.ac || []
+
+// Process Foto AC
+const acImages = []
+if (data.ac_photos && data.ac_photos.length > 0) {
+  for (const url of data.ac_photos) {
+    const b64 = await getBase64ImageFromUrl(url)
+    if (b64) {
+      acImages.push({
+        image: b64,
+        width: 180,
+        alignment: 'center',
+        margin: [0, 5, 0, 5]
+      })
+    }
+  }
+}
+
+// Susun Baris Tabel Unit AC
+const acTableRows = []
+acList.forEach((unit) => {
+  acTableRows.push([
+    { text: unit.kode_ac || 'AC', alignment: 'center', bold: true, margin: [0, 15, 0, 0] },
+    {
+      table: {
+        widths: ['40%', '60%'],
+        body: [
+          ['Merk', unit.merk || '-'],
+          ['PK', unit.pk || '-'],
+          ['SN', unit.sn || '-'],
+          ['Kapasitas MCB', unit.mcb || '-'],
+          ['Beban', unit.beban || '-'],
+          ['Tahun Instalasi', unit.tahun_instalasi || '-']
+        ]
+      },
+      layout: 'noBorders'
+    }
+  ])
+})
+
+// Push Halaman 5 ke content docDefinition
+docDefinition.content.push(
+  { text: '', pageBreak: 'after' },
+
+  // ================= PAGE 5: AIR CONDITIONER =================
+  // Header Grey
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: 'AIR CONDITIONER',
+            style: 'sectionTitleHeader',
+            alignment: 'center',
+            fillColor: '#808080',
+            color: '#ffffff',
+            bold: true,
+            margin: [0, 4, 0, 4]
+          }
+        ],
+        [
+          {
+            text: `JUMLAH AC ICON : ${acList.length}`,
+            bold: true,
+            margin: [2, 2, 0, 2]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1.5,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    }
+  },
+
+  // Tabel Unit AC (Sesuai Jumlah AC)
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: acTableRows.length > 0 ? acTableRows : [[{ text: 'Tidak ada data AC', colSpan: 2, alignment: 'center' }, '']]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Area Photos
+  {
+    table: {
+      widths: ['20%', '80%'],
+      body: [
+        [
+          { text: 'Photos :', bold: true, margin: [0, 10, 0, 0] },
+          acImages.length > 0
+            ? { stack: acImages }
+            : { text: '(Tidak ada foto)', italic: true, margin: [0, 10, 0, 0] }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  },
+
+  // Area Comments
+  {
+    table: {
+      widths: ['100%'],
+      body: [
+        [
+          {
+            text: `Comments : ${data.ac_comments || ''}`,
+            bold: true,
+            margin: [0, 5, 0, 20]
+          }
+        ]
+      ]
+    },
+    layout: {
+      hLineWidth: () => 1,
+      vLineWidth: () => 1.5,
+      hLineColor: () => '#000000',
+      vLineColor: () => '#000000'
+    },
+    margin: [0, -1, 0, 0]
+  }
+)
