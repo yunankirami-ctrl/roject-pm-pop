@@ -153,6 +153,13 @@ export const usePmStore = defineStore('pmReport', () => {
   comments: '',
   photos: []
 },
+distribusi_rak: {
+  mcbs: [
+    { mcb_label: 'MCB 1', rak_no: '', merk: '', kapasitas: '', a_terukur: '', peruntukan: '' }
+  ],
+  comments: '',
+  photos: []
+},
   })
   
 
@@ -168,6 +175,8 @@ export const usePmStore = defineStore('pmReport', () => {
       formData.value.battery_photos.push(url)
       } else if (moduleName === 'dcpdb') {
     formData.value.dcpdb.photos.push(url)
+    } else if (moduleName === 'distribusi_rak') {
+    formData.value.distribusi_rak.photos.push(url)
     } else if (formData.value[moduleName] && Array.isArray(formData.value[moduleName].photos)) {
       formData.value[moduleName].photos.push(url)
     }

@@ -14,6 +14,7 @@ import StepPowerDist from '../components/StepPowerDist.vue'
 import StepInverter from '../components/StepInverter.vue'
 import StepBattery from '../components/StepBattery.vue'
 import StepDcpdb from '../components/StepDcpdb.vue'
+import StepDistribusiRak from '../components/StepDistribusiRak.vue'
 import StepEnvironment from '../components/StepEnvironment.vue'
 
 const store = usePmStore()
@@ -32,6 +33,7 @@ const steps = [
   { name: 'Inverter', comp: StepInverter },
   { name: 'Battery', comp: StepBattery },
   { name: 'DCPDB', comp: StepDcpdb },
+  { name: 'DC Rak', comp: StepDistribusiRak },
   { name: 'Env', comp: StepEnvironment }
 ]
 
@@ -57,7 +59,8 @@ const submitReport = async () => {
       supabase.from('pm_acpdb').insert([{ ...store.formData.acpdb, report_id: reportId }]),
       supabase.from('pm_inverter').insert([{ inverters: store.formData.inverters, comments: store.formData.inverter_comments, photos: store.formData.inverter_photos, report_id: reportId }]),
       supabase.from('pm_battery').insert([{ batteries: store.formData.batteries, comments: store.formData.battery_comments, photos: store.formData.battery_photos, report_id: reportId }]),
-      supabase.from('pm_dcpdb').insert([{ ...store.formData.dcpdb, report_id: reportId }])
+      supabase.from('pm_dcpdb').insert([{ ...store.formData.dcpdb, report_id: reportId }]),
+      supabase.from('pm_distribusi_rak').insert([{ ...store.formData.distribusi_rak, report_id: reportId }])
     ])
 
     router.push('/report-detail')
